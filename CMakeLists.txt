@@ -56,3 +56,7 @@ target_link_libraries(ReadPCD librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${O
 add_executable(PCD2PLY app/PCD2PLY.cpp)
 add_dependencies(PCD2PLY ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(PCD2PLY librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(FrameTest app/FrameTest.cpp)
+add_dependencies(FrameTest ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(FrameTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})

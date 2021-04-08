@@ -1,5 +1,6 @@
 #include "Util.h"
 #include <boost/filesystem.hpp>
+#include <pcl/features/normal_3d.h>
 namespace rabbit
 {
     std::vector<std::string> Split(const std::string &str, const std::string &delim, int split_times)
@@ -207,5 +208,99 @@ namespace rabbit
             mapped_pcd.points[i].g= 255 * mapped_color[i](1);
             mapped_pcd.points[i].b = 255 * mapped_color[i](2);
         }       
+    }
+    void ColorizePCDXYZI(const PCDXYZI &pcdi, const Vec3f &c, PCDXYZRGB &mapped_pcd)
+    {
+        mapped_pcd.points.resize(pcdi.points.size());
+        std::vector<float> intensity_list;
+        for (size_t i = 0; i < pcdi.points.size(); i++) 
+        {
+            mapped_pcd.points[i].x = pcdi.points[i].x;
+            mapped_pcd.points[i].y = pcdi.points[i].y;
+            mapped_pcd.points[i].z = pcdi.points[i].z;
+            mapped_pcd.points[i].r = c[0] * 255;
+            mapped_pcd.points[i].g = c[1] * 255;
+            mapped_pcd.points[i].b = c[2] * 255;
+        }
+    }
+    void ColorizePCDXYZ(const PCDXYZ &pcd, const Vec3f &c, PCDXYZRGB &mapped_pcd)
+    {
+        mapped_pcd.points.resize(pcd.points.size());
+        std::vector<float> intensity_list;
+        for (size_t i = 0; i < pcd.points.size(); i++) 
+        {
+            mapped_pcd.points[i].x = pcd.points[i].x;
+            mapped_pcd.points[i].y = pcd.points[i].y;
+            mapped_pcd.points[i].z = pcd.points[i].z;
+            mapped_pcd.points[i].r = c[0] * 255;
+            mapped_pcd.points[i].g = c[1] * 255;
+            mapped_pcd.points[i].b = c[2] * 255;
+        }
+    }
+    void PCDXYZI2XYZ(const PCDXYZI &cloud_xyzi, PCDXYZ &cloud_xyz)
+    {
+        cloud_xyz.points.resize(cloud_xyzi.points.size());
+        for (size_t i = 0; i < cloud_xyz.points.size(); i++) 
+        {
+            cloud_xyz.points[i].x = cloud_xyzi.points[i].x;
+            cloud_xyz.points[i].y = cloud_xyzi.points[i].y;
+            cloud_xyz.points[i].z = cloud_xyzi.points[i].z;
+        }
+    }
+    void PCDXYZRGB2XYZ(const PCDXYZRGB &cloud_xyzrgb, PCDXYZ &cloud_xyz)
+    {
+        cloud_xyz.points.resize(cloud_xyzrgb.points.size());
+        for (size_t i = 0; i < cloud_xyz.points.size(); i++) 
+        {
+            cloud_xyz.points[i].x = cloud_xyzrgb.points[i].x;
+            cloud_xyz.points[i].y = cloud_xyzrgb.points[i].y;
+            cloud_xyz.points[i].z = cloud_xyzrgb.points[i].z;
+        }
+    }
+    void PCDXYZL2XYZ(const PCDXYZL &cloud_xyzl, PCDXYZ &cloud_xyz)
+    {
+        cloud_xyz.points.resize(cloud_xyzl.points.size());
+        for (size_t i = 0; i < cloud_xyz.points.size(); i++) 
+        {
+            cloud_xyz.points[i].x = cloud_xyzl.points[i].x;
+            cloud_xyz.points[i].y = cloud_xyzl.points[i].y;
+            cloud_xyz.points[i].z = cloud_xyzl.points[i].z;
+        }
+    }
+    void EstimateNormal(const PCDXYZI &pcd, PCDNormal &n, float search_radius)
+    {
+        pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> ne;
+        ne.setInputCloud (PCDXYZIPtr(new PCDXYZI (pcd)));
+        pcl::search::KdTree<pcl::PointXYZI>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZI> ());
+        ne.setSearchMethod (tree);
+        ne.setRadiusSearch (search_radius);
+        ne.compute (n);
+    }
+    void removeClosedPointCloud(const PCDXYZI&cloud_in,
+                                PCDXYZI &cloud_out, float thres)
+    {
+        if (&cloud_in != &cloud_out)
+        {
+            cloud_out.header = cloud_in.header;
+            cloud_out.points.resize(cloud_in.points.size());
+        }
+
+        size_t j = 0;
+
+        for (size_t i = 0; i < cloud_in.points.size(); ++i)
+        {
+            if (cloud_in.points[i].x * cloud_in.points[i].x + cloud_in.points[i].y * cloud_in.points[i].y + cloud_in.points[i].z * cloud_in.points[i].z < thres * thres)
+                continue;
+            cloud_out.points[j] = cloud_in.points[i];
+            j++;
+        }
+        if (j != cloud_in.points.size())
+        {
+            cloud_out.points.resize(j);
+        }
+
+        cloud_out.height = 1;
+        cloud_out.width = static_cast<uint32_t>(j);
+        cloud_out.is_dense = true;
     }
 }

@@ -7,6 +7,7 @@ The second class is just the visualizer from PCL.
 #define RABBIT_VISUALIZATION_H
 #include "Util.h"
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/range_image_visualizer.h>
 #include <pcl/console/parse.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include "IO.h"
@@ -33,6 +34,7 @@ namespace rabbit
 
                 viewer->addPointCloud(pcdc_ptr, "pcdc");
                 viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "pcdc");
+
                 viewer->addCoordinateSystem (1.0);
                 viewer->initCameraParameters ();
             }
@@ -57,6 +59,18 @@ namespace rabbit
                 *pcdc_ptr = pcdc;
                 viewer->updatePointCloud(pcdc_ptr, "pcdc");
             }
+            void SetRangeImage(const RangeImSph &rim)
+            {
+                // // we don't support to show dynamic range image
+                // rangeim_ptr = RangeImPtr(new  RangeImSph (rim) );
+                // pcl::visualization::PointCloudColorHandlerCustom<pcl::PointWithRange> rangeim_color_handler (rangeim_ptr, 0, 0, 0);
+                // viewer->addPointCloud (rangeim_ptr, rangeim_color_handler, "range image");
+                // viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "range image");
+                // setViewerPose(*viewer, rangeim_ptr->getTransformationToWorldSystem ());
+                if(!widget_ptr)
+                widget_ptr = new pcl::visualization::RangeImageVisualizer ("Range image");
+                widget_ptr->showRangeImage(rim);
+            }
             void SetPublisher(const ros::Publisher &ros_pub)
             {
                 publisher = ros_pub;
@@ -76,11 +90,19 @@ namespace rabbit
             void Show()
             {
                 while(true)
-                viewer->spinOnce(100);
+                {
+                    viewer->spinOnce(100);
+                    if(widget_ptr) widget_ptr->spinOnce(100);
+                }
             }
             void ShowOnce()
             {
                 viewer->spinOnce(100);
+                if(widget_ptr)  widget_ptr->spinOnce(100);
+            }
+            ~Visualizer()
+            {
+                delete widget_ptr;
             }
             ros::Publisher publisher;
             pcl::visualization::PCLVisualizer::Ptr viewer;
@@ -88,6 +110,8 @@ namespace rabbit
             PCDXYZPtr pcd_ptr;
             PCDXYZLPtr pcdl_ptr;
             PCDXYZRGBPtr pcdc_ptr;
+            // RangeImPtr rangeim_ptr;
+            pcl::visualization::RangeImageVisualizer * widget_ptr = nullptr;
         };
     }
 }
