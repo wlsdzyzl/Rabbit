@@ -34,14 +34,14 @@ namespace rabbit
     void Frame::ComputeFPFH()
     {
         // Create the FPFH estimation class, and pass the input dataset+normals to it
-        pcl::FPFHEstimation<pcl::PointXYZI, pcl::Normal, pcl::FPFHSignature33> fpfh_filter;
+        pcl::FPFHEstimation<PointType, pcl::Normal, pcl::FPFHSignature33> fpfh_filter;
         fpfh_filter.setInputCloud (pcd);
         fpfh_filter.setInputNormals (normal);
         // alternatively, if cloud is of tpe PointNormal, do fpfh.setInputNormals (cloud);
 
         // Create an empty kdtree representation, and pass it to the FPFH estimation object.
         // Its content will be filled inside the object, based on the given input dataset (as no other search surface is given).
-        pcl::search::KdTree<PointXYZI>::Ptr tree (new pcl::search::KdTree<PointXYZI>);
+        pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType>);
         fpfh = PCDFPFHPtr(new PCDFPFH ());
         fpfh_filter.setSearchMethod (tree);
         // Use all neighbors in a sphere of radius 5cm
@@ -55,14 +55,14 @@ namespace rabbit
     // void Frame::ComputeVFH()
     // {
     //     // Create the VFH estimation class, and pass the input dataset+normals to it
-    //     pcl::VFHEstimation<pcl::PointXYZI, pcl::Normal, pcl::VFHSignature308> vfh_filter;
+    //     pcl::VFHEstimation<PointType, pcl::Normal, pcl::VFHSignature308> vfh_filter;
     //     vfh_filter.setInputCloud (pcd);
     //     vfh_filter.setInputNormals (normal);
     //     // alternatively, if cloud is of type PointNormal, do vfh.setInputNormals (cloud);
 
     //     // Create an empty kdtree representation, and pass it to the FPFH estimation object.
     //     // Its content will be filled inside the object, based on the given input dataset (as no other search surface is given).
-    //     pcl::search::KdTree<pcl::PointXYZI>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZI> ());
+    //     pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType> ());
     //     vfh_filter.setSearchMethod (tree);
 
     //     // Output datasets
@@ -73,16 +73,16 @@ namespace rabbit
     // }
     void Frame::LoadFromMsg(const sensor_msgs::PointCloud2ConstPtr &laser_cloudMsg)
     {
-        pcd = PCDXYZIPtr( new PCDXYZI ());
+        pcd = PointCloudPtr( new PointCloud ());
         pcl::fromROSMsg(*laser_cloudMsg, *pcd);
         std::vector<int> indices;
         // prepropose
         pcl::removeNaNFromPointCloud(*pcd, *pcd, indices);
-        removeClosedPointCloud(*pcd, *pcd, mininum_range);
+        RemoveClosedPointCloud(*pcd, *pcd, mininum_range);
     }
-    void Frame::SetPCD(const PCDXYZI &_pcd)
+    void Frame::SetPCD(const PointCloud &_pcd)
     {
-        pcd = PCDXYZIPtr ( new PCDXYZI (_pcd));
+        pcd = PointCloudPtr ( new PointCloud (_pcd));
     }
     // the code is modified from A-LOAM: scanRegistration.cpp
     void Frame::ComputeLOAMFeature()
@@ -108,9 +108,9 @@ namespace rabbit
 
         bool half_passed = false;
         int count = cloud_size;
-        PointXYZI point;
+        PointType point;
         // put each point cloud into the corresponding scans. If we have a 16-line lidar, there will be 16 scans in each frame.
-        std::vector<PCDXYZI> laser_cloud_scans(lidar_ring_n);
+        std::vector<PointCloud> laser_cloud_scans(lidar_ring_n);
         for (int i = 0; i < cloud_size; i++)
         {
             point.x = pcd->points[i].x;
@@ -194,7 +194,7 @@ namespace rabbit
         }
         cloud_size = count;
 
-        PCDXYZI::Ptr laser_cloud(new PCDXYZI());
+        PointCloud::Ptr laser_cloud(new PointCloud());
         // start and end index, and there is a margin between each scans. Later we will compute curvatures for these points.
         for (int i = 0; i < lidar_ring_n; i++)
         { 
@@ -217,15 +217,15 @@ namespace rabbit
 
 
 
-        PCDXYZI sharp_points;
-        PCDXYZI less_sharp_points;
-        PCDXYZI flat_points;
-        PCDXYZI less_flat_points;
+        sharp_points = PointCloudPtr(new PointCloud());
+        less_sharp_points = PointCloudPtr(new PointCloud());
+        flat_points = PointCloudPtr(new PointCloud());
+        less_flat_points = PointCloudPtr(new PointCloud());
         for (int i = 0; i < lidar_ring_n; i++)
         {
             if( scan_end_id[i] - scan_start_id[i] < parts_n)
                 continue;
-            PCDXYZI::Ptr current_less_flat_points(new PCDXYZI);
+            PointCloud::Ptr current_less_flat_points(new PointCloud);
             // seperate each scan into 6 parts
             for (int j = 0; j < 6; j++)
             {
@@ -245,14 +245,14 @@ namespace rabbit
                         if (largest_picked_n <= sharp_points_n_each_part)
                         {                        
                             cloud_label[ind] = 2;
-                            sharp_points.push_back(laser_cloud->points[ind]);
-                            less_sharp_points.push_back(laser_cloud->points[ind]);
+                            sharp_points->push_back(laser_cloud->points[ind]);
+                            less_sharp_points->push_back(laser_cloud->points[ind]);
                         }
                         else if (largest_picked_n <= less_sharp_points_n_each_part)
                         {                        
                             // two sharp edge points, and 20 less sharp edge points
                             cloud_label[ind] = 1; 
-                            less_sharp_points.push_back(laser_cloud->points[ind]);
+                            less_sharp_points->push_back(laser_cloud->points[ind]);
                         }
                         else
                         {
@@ -299,7 +299,7 @@ namespace rabbit
                     {
 
                         cloud_label[ind] = -1; 
-                        flat_points.push_back(laser_cloud->points[ind]);
+                        flat_points->push_back(laser_cloud->points[ind]);
 
                         smallest_picked_n++;
                         if (smallest_picked_n >= flat_points_n_each_part)
@@ -343,14 +343,25 @@ namespace rabbit
                 }
             }
             // less flat surf points will contains flat points and non-sharp points. 
-            PCDXYZI current_less_flat_points_ds;
-            pcl::VoxelGrid<PointXYZI> downsize_filter;
+            PointCloud current_less_flat_points_ds;
+            pcl::VoxelGrid<PointType> downsize_filter;
             downsize_filter.setInputCloud(current_less_flat_points);
             downsize_filter.setLeafSize(0.2, 0.2, 0.2);
             downsize_filter.filter(current_less_flat_points_ds);
 
-            less_flat_points += current_less_flat_points_ds;
+            (*less_flat_points) += current_less_flat_points_ds;
         }
+        less_sharp_kdtree =
+            pcl::KdTreeFLANN<PointType>::Ptr (new pcl::KdTreeFLANN<PointType>());
+        less_flat_kdtree =
+            pcl::KdTreeFLANN<PointType>::Ptr (new pcl::KdTreeFLANN<PointType>());    
+        less_sharp_kdtree->setInputCloud(less_sharp_points);
+        less_flat_kdtree->setInputCloud(less_flat_points);    
+
+        std::cout<<BLUE<<"[INFO]::[LoamFeature]::\nSharp points: "<<sharp_points->points.size()
+            <<"\nLess sharp points: "<<less_sharp_points->points.size()
+            <<"\nFlat points: "<<flat_points->points.size()
+            <<"\nLess flat points: "<<less_flat_points->points.size()<<RESET<<std::endl;
     }
 
     void Frame::CreateRangeImage()

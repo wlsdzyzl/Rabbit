@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         MakeDir(argv[2]);
         for(size_t i = 0; i != seq.size(); ++i)
         {
-            PCDXYZI pcd; 
+            PointCloud pcd; 
             io::LoadPCD(seq[i], pcd);
             std::vector<std::string> strs = RSplit(seq[i], "/", 1);
             std::string filename = seq[i];
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        PCDXYZI pcd; 
+        PointCloud pcd; 
         io::LoadPCD(argv[1], pcd);
         io::WritePLY(argv[2] , pcd, true);
     }

@@ -15,15 +15,16 @@ namespace rabbit
     struct Frame
     {
         int frame_id;
-        PCDXYZIPtr pcd;
+        PointCloudPtr pcd;
         PCDFPFHPtr fpfh;
         // PCDVFHPtr vfh;
         PCDNormalPtr normal;
-        PCDXYZIPtr sharp_points;
-        PCDXYZIPtr less_sharp_points;
-        PCDXYZIPtr flat_points;
-        PCDXYZIPtr less_flat_points;
-
+        PointCloudPtr sharp_points;
+        PointCloudPtr less_sharp_points;
+        PointCloudPtr flat_points;
+        PointCloudPtr less_flat_points;
+        pcl::KdTreeFLANN<PointType>::Ptr less_sharp_kdtree;
+        pcl::KdTreeFLANN<PointType>::Ptr less_flat_kdtree;
         // matching on range image
 
         RangeImSphPtr range_image;
@@ -31,7 +32,7 @@ namespace rabbit
         PCDNARFPtr narf_deps;
 
         void LoadFromMsg(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg);
-        void SetPCD(const PCDXYZI &_pcd);
+        void SetPCD(const PointCloud &_pcd);
         void ComputeNormal();
         void ComputeFPFH();
         // void ComputeVFH();

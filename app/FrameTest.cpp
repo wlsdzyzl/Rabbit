@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         visualization::Visualizer visualizer;
         for(size_t i = 0; i != seq.size(); ++i)
         {
-            PCDXYZI pcd; 
+            PointCloud pcd; 
             io::LoadPCD(seq[i], pcd);
             Frame frame; 
             frame.SetPCD(pcd);
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        PCDXYZI pcd; 
+        PointCloud pcd; 
         io::LoadPCD(argv[1], pcd);
         Frame frame; 
         frame.SetPCD(pcd);

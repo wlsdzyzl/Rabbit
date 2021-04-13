@@ -1,6 +1,7 @@
 #include "Util.h"
 #include <boost/filesystem.hpp>
 #include <pcl/features/normal_3d.h>
+#include <pcl/filters/approximate_voxel_grid.h>
 namespace rabbit
 {
     std::vector<std::string> Split(const std::string &str, const std::string &delim, int split_times)
@@ -189,7 +190,7 @@ namespace rabbit
             mapped_color.push_back(color_table[map[color_id[i]]]);
         }
     }
-    void ColorizePCDXYZI(const PCDXYZI &pcdi, PCDXYZRGB &mapped_pcd)
+    void ColorizePointCloud(const PointCloud &pcdi, PointCloudRGB &mapped_pcd)
     {
         mapped_pcd.points.resize(pcdi.points.size());
         std::vector<float> intensity_list;
@@ -209,7 +210,7 @@ namespace rabbit
             mapped_pcd.points[i].b = 255 * mapped_color[i](2);
         }       
     }
-    void ColorizePCDXYZI(const PCDXYZI &pcdi, const Vec3f &c, PCDXYZRGB &mapped_pcd)
+    void ColorizePointCloud(const PointCloud &pcdi, const Vec3f &c, PointCloudRGB &mapped_pcd)
     {
         mapped_pcd.points.resize(pcdi.points.size());
         std::vector<float> intensity_list;
@@ -223,61 +224,17 @@ namespace rabbit
             mapped_pcd.points[i].b = c[2] * 255;
         }
     }
-    void ColorizePCDXYZ(const PCDXYZ &pcd, const Vec3f &c, PCDXYZRGB &mapped_pcd)
+    void EstimateNormal(const PointCloud &pcd, PCDNormal &n, float search_radius)
     {
-        mapped_pcd.points.resize(pcd.points.size());
-        std::vector<float> intensity_list;
-        for (size_t i = 0; i < pcd.points.size(); i++) 
-        {
-            mapped_pcd.points[i].x = pcd.points[i].x;
-            mapped_pcd.points[i].y = pcd.points[i].y;
-            mapped_pcd.points[i].z = pcd.points[i].z;
-            mapped_pcd.points[i].r = c[0] * 255;
-            mapped_pcd.points[i].g = c[1] * 255;
-            mapped_pcd.points[i].b = c[2] * 255;
-        }
-    }
-    void PCDXYZI2XYZ(const PCDXYZI &cloud_xyzi, PCDXYZ &cloud_xyz)
-    {
-        cloud_xyz.points.resize(cloud_xyzi.points.size());
-        for (size_t i = 0; i < cloud_xyz.points.size(); i++) 
-        {
-            cloud_xyz.points[i].x = cloud_xyzi.points[i].x;
-            cloud_xyz.points[i].y = cloud_xyzi.points[i].y;
-            cloud_xyz.points[i].z = cloud_xyzi.points[i].z;
-        }
-    }
-    void PCDXYZRGB2XYZ(const PCDXYZRGB &cloud_xyzrgb, PCDXYZ &cloud_xyz)
-    {
-        cloud_xyz.points.resize(cloud_xyzrgb.points.size());
-        for (size_t i = 0; i < cloud_xyz.points.size(); i++) 
-        {
-            cloud_xyz.points[i].x = cloud_xyzrgb.points[i].x;
-            cloud_xyz.points[i].y = cloud_xyzrgb.points[i].y;
-            cloud_xyz.points[i].z = cloud_xyzrgb.points[i].z;
-        }
-    }
-    void PCDXYZL2XYZ(const PCDXYZL &cloud_xyzl, PCDXYZ &cloud_xyz)
-    {
-        cloud_xyz.points.resize(cloud_xyzl.points.size());
-        for (size_t i = 0; i < cloud_xyz.points.size(); i++) 
-        {
-            cloud_xyz.points[i].x = cloud_xyzl.points[i].x;
-            cloud_xyz.points[i].y = cloud_xyzl.points[i].y;
-            cloud_xyz.points[i].z = cloud_xyzl.points[i].z;
-        }
-    }
-    void EstimateNormal(const PCDXYZI &pcd, PCDNormal &n, float search_radius)
-    {
-        pcl::NormalEstimation<pcl::PointXYZI, pcl::Normal> ne;
-        ne.setInputCloud (PCDXYZIPtr(new PCDXYZI (pcd)));
-        pcl::search::KdTree<pcl::PointXYZI>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZI> ());
+        pcl::NormalEstimation<PointType, pcl::Normal> ne;
+        ne.setInputCloud (PointCloudPtr(new PointCloud (pcd)));
+        pcl::search::KdTree<PointType>::Ptr tree (new pcl::search::KdTree<PointType> ());
         ne.setSearchMethod (tree);
         ne.setRadiusSearch (search_radius);
         ne.compute (n);
     }
-    void removeClosedPointCloud(const PCDXYZI&cloud_in,
-                                PCDXYZI &cloud_out, float thres)
+    void RemoveClosedPointCloud(const PointCloud&cloud_in,
+                                PointCloud &cloud_out, float thres)
     {
         if (&cloud_in != &cloud_out)
         {
@@ -302,5 +259,13 @@ namespace rabbit
         cloud_out.height = 1;
         cloud_out.width = static_cast<uint32_t>(j);
         cloud_out.is_dense = true;
+    }
+    void FilterPCD(const PointCloud &cloud_in, PointCloud &cloud_out, float x_leaf_size, float y_leaf_size, float z_leaf_size)
+    {
+        PointCloudPtr in_ptr(new PointCloud(cloud_in));
+        pcl::ApproximateVoxelGrid<PointType> approximate_voxel_filter;
+        approximate_voxel_filter.setLeafSize (x_leaf_size, y_leaf_size, z_leaf_size);
+        approximate_voxel_filter.setInputCloud (in_ptr);
+        approximate_voxel_filter.filter (cloud_out);
     }
 }

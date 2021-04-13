@@ -5,15 +5,15 @@ namespace rabbit
 {
     namespace io
     {
-         void LoadPCD(const std::string &filename, PCDXYZ &pcd)
+         void LoadPCD(const std::string &filename, PointCloud &pcd)
          {
              pcl::io::loadPCDFile(filename.c_str(),  pcd);
          }
-        void LoadPLY(const std::string &filename, PCDXYZ &pcd)
+        void LoadPLY(const std::string &filename, PointCloud &pcd)
         {
             pcl::io::loadPLYFile(filename.c_str(), pcd);
         }
-        void LoadFile(const std::string &filename, PCDXYZ &pcd)
+        void LoadFile(const std::string &filename, PointCloud &pcd)
         {
             std::string suffix = "";
             std::vector<std::string> strs = RSplit(filename, ".", 1);
@@ -24,15 +24,15 @@ namespace rabbit
             else 
                 std::cout<<YELLOW<<"[WARNING]::[IO]::Rabbit only support .ply or .pcd file."<<RESET<<std::endl;
         }
-         void LoadPCD(const std::string &filename, PCDXYZI &pcd)
+         void LoadPCD(const std::string &filename, PointCloudRGB &pcd)
          {
              pcl::io::loadPCDFile(filename.c_str(),  pcd);
          }
-        void LoadPLY(const std::string &filename, PCDXYZI &pcd)
+        void LoadPLY(const std::string &filename, PointCloudRGB &pcd)
         {
             pcl::io::loadPLYFile(filename.c_str(), pcd);
         }
-        void LoadFile(const std::string &filename, PCDXYZI &pcd)
+        void LoadFile(const std::string &filename, PointCloudRGB &pcd)
         {
             std::string suffix = "";
             std::vector<std::string> strs = RSplit(filename, ".", 1);
@@ -43,44 +43,7 @@ namespace rabbit
             else 
                 std::cout<<YELLOW<<"[WARNING]::[IO]::Rabbit only support .ply or .pcd file."<<RESET<<std::endl;
         }
-         void LoadPCD(const std::string &filename, PCDXYZRGB &pcd)
-         {
-             pcl::io::loadPCDFile(filename.c_str(),  pcd);
-         }
-        void LoadPLY(const std::string &filename, PCDXYZRGB &pcd)
-        {
-            pcl::io::loadPLYFile(filename.c_str(), pcd);
-        }
-        void LoadFile(const std::string &filename, PCDXYZRGB &pcd)
-        {
-            std::string suffix = "";
-            std::vector<std::string> strs = RSplit(filename, ".", 1);
-            if(strs.size() == 2) suffix = strs[1];
-            boost::algorithm::to_lower(suffix);
-            if(suffix == "pcd")    LoadPCD(filename, pcd);
-            else if(suffix == "ply")    LoadPLY(filename, pcd);
-            else 
-                std::cout<<YELLOW<<"[WARNING]::[IO]::Rabbit only support .ply or .pcd file."<<RESET<<std::endl;
-        }
-         void LoadPCD(const std::string &filename, PCDXYZL &pcd)
-         {
-             pcl::io::loadPCDFile(filename.c_str(),  pcd);
-         }
-        void LoadPLY(const std::string &filename, PCDXYZL &pcd)
-        {
-            pcl::io::loadPLYFile(filename.c_str(), pcd);
-        }
-        void LoadFile(const std::string &filename, PCDXYZL &pcd)
-        {
-            std::string suffix = "";
-            std::vector<std::string> strs = RSplit(filename, ".", 1);
-            if(strs.size() == 2) suffix = strs[1];
-            boost::algorithm::to_lower(suffix);
-            if(suffix == "pcd")    LoadPCD(filename, pcd);
-            else if(suffix == "ply")    LoadPLY(filename, pcd);
-            else 
-                std::cout<<YELLOW<<"[WARNING]::[IO]::Rabbit only support .ply or .pcd file."<<RESET<<std::endl;
-        }
+
         bool ComparePCDPath(const std::string &p1, const std::string &p2)
         {
             int id1 = ExtractIDFromPath(p1);
@@ -103,36 +66,21 @@ namespace rabbit
             std::sort(sequence.begin(), sequence.end(), ComparePCDPath);
         }
         // TODO: Load PoseGraph
-        void WritePCD(const std::string &filename, const PCDXYZ & pcd, bool use_ascii)
+
+        void WritePCD(const std::string &filename, const PointCloud & pcd, bool use_ascii)
         {
             pcl::io::savePCDFile(filename.c_str(), pcd, !use_ascii);
         }
-        void WritePLY(const std::string &filename, const PCDXYZ & pcd, bool use_ascii)
+        void WritePLY(const std::string &filename, const PointCloud & pcd, bool use_ascii)
         {
                 pcl::io::savePLYFile(filename.c_str(), pcd, !use_ascii);
         }
 
-        void WritePCD(const std::string &filename, const PCDXYZI & pcd, bool use_ascii)
+        void WritePCD(const std::string &filename, const PointCloudRGB & pcd, bool use_ascii)
         {
             pcl::io::savePCDFile(filename.c_str(), pcd, !use_ascii);
         }
-        void WritePLY(const std::string &filename, const PCDXYZI & pcd, bool use_ascii)
-        {
-                pcl::io::savePLYFile(filename.c_str(), pcd, !use_ascii);
-        }
-        void WritePCD(const std::string &filename, const PCDXYZL & pcd, bool use_ascii)
-        {
-            pcl::io::savePCDFile(filename.c_str(), pcd, !use_ascii);
-        }
-        void WritePLY(const std::string &filename, const PCDXYZL & pcd, bool use_ascii)
-        {
-                pcl::io::savePLYFile(filename.c_str(), pcd, !use_ascii);
-        }
-        void WritePCD(const std::string &filename, const PCDXYZRGB & pcd, bool use_ascii)
-        {
-            pcl::io::savePCDFile(filename.c_str(), pcd, !use_ascii);
-        }
-        void WritePLY(const std::string &filename, const PCDXYZRGB & pcd, bool use_ascii)
+        void WritePLY(const std::string &filename, const PointCloudRGB & pcd, bool use_ascii)
         {
                 pcl::io::savePLYFile(filename.c_str(), pcd, !use_ascii);
         }

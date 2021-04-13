@@ -23,14 +23,7 @@ namespace rabbit
             {
                 viewer =  pcl::visualization::PCLVisualizer::Ptr(new pcl::visualization::PCLVisualizer ("rabbit"));
                 publisher_initialized = false;
-                pcd_ptr = PCDXYZPtr(new PCDXYZ ());
-                pcdl_ptr = PCDXYZLPtr(new PCDXYZL());
-                pcdc_ptr = PCDXYZRGBPtr( new PCDXYZRGB());
-                viewer->addPointCloud(pcd_ptr, "pcd");
-                viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "pcd");
-
-                viewer->addPointCloud(pcdl_ptr, "pcdl");
-                viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "pcdl");
+                pcdc_ptr = PointCloudRGBPtr( new PointCloudRGB());
 
                 viewer->addPointCloud(pcdc_ptr, "pcdc");
                 viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "pcdc");
@@ -38,23 +31,24 @@ namespace rabbit
                 viewer->addCoordinateSystem (1.0);
                 viewer->initCameraParameters ();
             }
-            void SetPCD(const PCDXYZ &pcd)
-            {
-                *pcd_ptr = pcd;
-                viewer->updatePointCloud(pcd_ptr, "pcd");
-            }
+            // void SetPCD(const PCDXYZ &pcd)
+            // {
+            //     *pcd_ptr = pcd;
+            //     viewer->updatePointCloud(pcd_ptr, "pcd");
+            // }
+            // void SetPCD(const PCDXYZL &pcdl)
+            // {
+            //     *pcdl_ptr = pcdl;
+            //     viewer->updatePointCloud(pcdl_ptr, "pcdl");
+            // }
             // histogram equalization
-            void SetPCD(const PCDXYZI &pcdi)
+            void SetPCD(const PointCloud &pcdi)
             {
-                ColorizePCDXYZI(pcdi, *pcdc_ptr);
+                ColorizePointCloud(pcdi, *pcdc_ptr);
                 viewer->updatePointCloud(pcdc_ptr, "pcdc");
             }
-            void SetPCD(const PCDXYZL &pcdl)
-            {
-                *pcdl_ptr = pcdl;
-                viewer->updatePointCloud(pcdl_ptr, "pcdl");
-            }
-            void SetPCD(const PCDXYZRGB &pcdc)
+
+            void SetPCD(const PointCloudRGB &pcdc)
             {
                 *pcdc_ptr = pcdc;
                 viewer->updatePointCloud(pcdc_ptr, "pcdc");
@@ -70,22 +64,6 @@ namespace rabbit
                 if(!widget_ptr)
                 widget_ptr = new pcl::visualization::RangeImageVisualizer ("Range image");
                 widget_ptr->showRangeImage(rim);
-            }
-            void SetPublisher(const ros::Publisher &ros_pub)
-            {
-                publisher = ros_pub;
-                publisher_initialized = true;
-            }
-            void Publish(const PCDXYZ &pcd)
-            {
-                if(!publisher_initialized)
-                {
-                    std::cout<<RED<<"[ERROR]::[visualizer]::You need to set publisher firstly."<<RESET<<std::endl;
-                    return;
-                }
-                sensor_msgs::PointCloud2 output;
-                pcl::toROSMsg(pcd, output);
-                publisher.publish(output);
             }
             void Show()
             {
@@ -104,12 +82,9 @@ namespace rabbit
             {
                 delete widget_ptr;
             }
-            ros::Publisher publisher;
             pcl::visualization::PCLVisualizer::Ptr viewer;
             bool publisher_initialized = false;
-            PCDXYZPtr pcd_ptr;
-            PCDXYZLPtr pcdl_ptr;
-            PCDXYZRGBPtr pcdc_ptr;
+            PointCloudRGBPtr pcdc_ptr;
             // RangeImPtr rangeim_ptr;
             pcl::visualization::RangeImageVisualizer * widget_ptr = nullptr;
         };

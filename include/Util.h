@@ -20,7 +20,7 @@
 #include <Eigen/StdVector>
 #include <Eigen/Eigenvalues> 
 #include <Eigen/Eigen>
-
+#include <sophus/se3.hpp>
 
 #define RESET   "\033[0m"
 #define BLACK   "\033[30m"      /* Black */
@@ -33,18 +33,14 @@
 #define COLOR_RANGE 512
 namespace rabbit
 {
-    typedef pcl::PointXYZI PointXYZI;
-    typedef pcl::PointXYZINormal PointXYZIN;
-    typedef pcl::PointCloud<pcl::PointXYZ>  PCDXYZ;
-    typedef pcl::PointCloud<pcl::PointXYZ>::Ptr PCDXYZPtr;
-    typedef pcl::PointCloud<pcl::PointXYZI>  PCDXYZI;
-    typedef pcl::PointCloud<pcl::PointXYZINormal>  PCDXYZIN;
-    typedef pcl::PointCloud<pcl::PointXYZINormal>::Ptr  PCDXYZINPtr;
-    typedef pcl::PointCloud<pcl::PointXYZI>::Ptr PCDXYZIPtr;
-    typedef pcl::PointCloud<pcl::PointXYZL>  PCDXYZL;
-    typedef pcl::PointCloud<pcl::PointXYZL>::Ptr PCDXYZLPtr;
-    typedef pcl::PointCloud<pcl::PointXYZRGB>  PCDXYZRGB;
-    typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PCDXYZRGBPtr;
+    typedef pcl::PointXYZI PointType;
+    typedef pcl::PointXYZINormal PointTypeN;
+    typedef pcl::PointCloud<pcl::PointXYZI>  PointCloud;
+    typedef pcl::PointCloud<pcl::PointXYZINormal>  PointCloudN;
+    typedef pcl::PointCloud<pcl::PointXYZINormal>::Ptr  PointCloudNPtr;
+    typedef pcl::PointCloud<pcl::PointXYZI>::Ptr PointCloudPtr;
+    typedef pcl::PointCloud<pcl::PointXYZRGB>  PointCloudRGB;
+    typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr PointCloudRGBPtr;
     typedef pcl::PointCloud<pcl::Normal> PCDNormal;
     typedef pcl::PointCloud<pcl::Normal>::Ptr PCDNormalPtr;
 
@@ -61,9 +57,29 @@ namespace rabbit
     typedef pcl::PointCloud<pcl::Narf36> PCDNARF;
     typedef pcl::PointCloud<pcl::Narf36>::Ptr PCDNARFPtr;
 
+    typedef Eigen::Matrix<float, 4, 4> Mat4f;
+    typedef std::vector<Mat4f, Eigen::aligned_allocator<Mat4f> > Mat4fList; 
 
+    typedef Eigen::Matrix<double, 4, 4> Mat4;
+    typedef std::vector<Mat4, Eigen::aligned_allocator<Mat4> > Mat4List; 
+    
     typedef Eigen::Vector3f Vec3f;
     typedef std::vector<Vec3f, Eigen::aligned_allocator<Vec3f> > Vec3fList; 
+
+    typedef Eigen::Matrix<double, 3, 1> Vec3;
+    typedef std::vector<Vec3, Eigen::aligned_allocator<Vec3> > Vec3List; 
+
+
+    typedef Sophus::SE3f SE3f;
+    typedef std::vector<SE3f, Eigen::aligned_allocator<SE3f>> SE3fList;
+
+    typedef Sophus::SE3d SE3;
+    typedef std::vector<SE3, Eigen::aligned_allocator<SE3>> SE3List;
+
+
+    typedef Eigen::Matrix<float, 6, 1> Vec6f;
+    typedef Eigen::Matrix<double, 6, 1> Vec6;
+
     //to split a string, or reversely split a string
     std::vector<std::string> Split(const std::string &str, const std::string &delim, int split_times = -1);
     std::vector<std::string> RSplit(const std::string &str, const std::string &delim, int split_times = -1);
@@ -77,14 +93,10 @@ namespace rabbit
     int ExtractIDFromPath(const std::string &path);
 
     void ColorRemapping(const std::vector<float> &values, Vec3fList &mapped_color);
-    void ColorizePCDXYZI(const PCDXYZI &pcd, PCDXYZRGB &mapped_pcd);
-    void ColorizePCDXYZI(const PCDXYZ &pcd, const Vec3f &c, PCDXYZRGB &mapped_pcd);
-    void ColorizePCDXYZ(const PCDXYZ &pcd, const Vec3f &c, PCDXYZRGB &mapped_pcd);
+    void ColorizePointCloud(const PointCloud &pcd, PointCloudRGB &mapped_pcd);
+    void ColorizePointCloud(const PointCloud &pcd, const Vec3f &c, PointCloudRGB &mapped_pcd);
 
-    void PCDXYZI2XYZ(const PCDXYZI &cloud_xyzi, PCDXYZ &cloud_xyz);
-    void PCDXYZL2XYZ(const PCDXYZL &cloud_xyzl, PCDXYZ &cloud_xyz);
-    void PCDXYZRGB2XYZ(const PCDXYZRGB &cloud_xyzrgb, PCDXYZ &cloud_xyz);
-    void EstimateNormal(const PCDXYZI &pcd, PCDNormal &n, float search_radius);
+    void EstimateNormal(const PointCloud &pcd, PCDNormal &n, float search_radius);
     // from degree to radian
     inline double Rad2Deg(double radians)
     {
@@ -95,7 +107,8 @@ namespace rabbit
     {
     return degrees * M_PI / 180.0;
     }
-    void removeClosedPointCloud(const PCDXYZI&cloud_in,
-                                PCDXYZI &cloud_out, float thres = 0.1);
+    void RemoveClosedPointCloud(const PointCloud&cloud_in,
+                                PointCloud &cloud_out, float thres = 0.1);
+    void FilterPCD(const PointCloud &cloud_in, PointCloud &cloud_out, float x_leaf_size = 0.2, float y_leaf_size = 0.2, float z_leaf_size = 0.2);
 }
 #endif
