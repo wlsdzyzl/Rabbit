@@ -5,15 +5,10 @@ define several types of residual: point 2 point, point 2 line, point 2 plane
 The code is based on A-LOAM.
 Also, we will define pose 2 pose, based on sophus.
 */
-
-#include <ceres/ceres.h>
-#include <ceres/rotation.h>
-#include <eigen3/Eigen/Dense>
-#include <pcl/kdtree/kdtree_flann.h>
-#include "Util.h"
-#include <sophus/interpolate.hpp>
-#include <ceres/local_parameterization.h>
+#include "LocalParameterization.h"
 namespace rabbit
+{
+namespace factors
 {
     struct Point2LineFactor
     {
@@ -168,66 +163,35 @@ namespace rabbit
         Vec3 curr_point;
         Vec3 closed_point;
     };
-    struct Pose2PoseFactor
+    // for pose graph optimization
+    struct PoseEdgeFactor
     {
+        PoseEdgeFactor( SE3 relative_pose_) 
+                            : relative_pose(relative_pose_){}
+        template <class T>
+        bool operator()(T const* const cp, T const* const lp, T* res) const 
+        {
+            Eigen::Map<Sophus::SE3<T> const> const curr_pose(cp);
+            Eigen::Map<Sophus::SE3<T> const> const last_pose(lp);
+            Eigen::Map<Eigen::Matrix<T, 6, 1> > residuals(res);
+            // We are able to mix Sophus types with doubles and Jet types without
+            // needing to cast to T.
+            residuals = ( last_pose * relative_pose.cast<T>() * curr_pose.inverse() ).log();
+            return true;
+        }
 
-        Pose2PoseFactor( SE3 curr_pose_, SE3 last_pose_) 
-                            : curr_pose(curr_pose_), last_pose(last_pose_){}
-
-    template <class T>
-    bool operator()(T const* const c2l, T* res) const {
-        Eigen::Map<Sophus::SE3<T> const> const curr2last(c2l);
-        Eigen::Map<Eigen::Matrix<T, 6, 1> > residuals(res);
-        // We are able to mix Sophus types with doubles and Jet types without
-        // needing to cast to T.
-        residuals = (curr_pose.cast<T>() *  curr2last * last_pose.cast<T>().inverse() ).log();
-        return true;
-    }
-
-        static ceres::CostFunction *Create(const SE3 curr_pose_, const SE3 last_pose_)
+        static ceres::CostFunction *Create(const SE3 relative_pose_)
         {
             return (new ceres::AutoDiffCostFunction<
-                    Pose2PoseFactor, SE3::DoF, SE3::num_parameters>(
-                new Pose2PoseFactor(curr_pose_, last_pose_)));
+                   PoseEdgeFactor, SE3::DoF, SE3::num_parameters, SE3::num_parameters>(
+                new PoseEdgeFactor(relative_pose_)));
         }
-        SE3 curr_pose;
-        SE3 last_pose;
+        // from curr point cloud to last point cloud
+        SE3 relative_pose;
+        // we could use information matrix to scale the residual
     };
 
-    class LocalParameterizationSE3 : public ceres::LocalParameterization 
-    {
-        public:
-        virtual ~LocalParameterizationSE3() {}
-
-        // SE3 plus operation for Ceres
-        //
-        //  T * exp(x)
-        //
-        virtual bool Plus(double const* T_raw, double const* delta_raw,
-                            double* T_plus_delta_raw) const {
-            Eigen::Map<SE3 const> const T(T_raw);
-            Eigen::Map<Vec6 const> const delta(delta_raw);
-            Eigen::Map<SE3> T_plus_delta(T_plus_delta_raw);
-            T_plus_delta = T * SE3::exp(delta);
-            return true;
-        }
-
-        // Jacobian of SE3 plus operation for Ceres
-        //
-        // Dx T * exp(x)  with  x=0
-        //
-        virtual bool ComputeJacobian(double const* T_raw,
-                                    double* jacobian_raw) const {
-            Eigen::Map<SE3 const> T(T_raw);
-            Eigen::Map<Eigen::Matrix<double, 7, 6, Eigen::RowMajor>> jacobian(
-                jacobian_raw);
-            jacobian = T.Dx_this_mul_exp_x_at_0();
-            return true;
-        }
-
-        virtual int GlobalSize() const { return SE3::num_parameters; }
-
-        virtual int LocalSize() const { return SE3::DoF; }
-    };
+    // imu factor
+}
 }
 #endif

@@ -1,9 +1,9 @@
-#include "IO.h"
+#include "Utils/IO.h"
 #include <pcl/io/ply_io.h>
 #include <algorithm>
 namespace rabbit
 {
-    namespace io
+    namespace utils
     {
          void LoadPCD(const std::string &filename, PointCloud &pcd)
          {

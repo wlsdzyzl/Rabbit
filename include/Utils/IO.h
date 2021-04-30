@@ -4,10 +4,10 @@ Created bu Guoqing 2021.3.24
 */
 #ifndef RABBIT_IO_H
 #define RABBIT_IO_H
-#include "Util.h"
+#include "Utils/Util.h"
 namespace rabbit
 {
-    namespace io
+    namespace utils
     {
         void LoadPCD(const std::string &s, PointCloud &pcd);
         void LoadPLY(const std::string &s, PointCloud &pcd);

@@ -1,5 +1,5 @@
 #include "Odometry.h"
-#include "IO.h"
+#include "Utils/IO.h"
 #include "Visualization.h"
 using namespace rabbit;
 
@@ -8,7 +8,7 @@ int main(int argc, char **argv)
     if(argc == 3)
     {
         std::vector<std::string> seq; 
-        io::GetPCDSequence(argv[1], seq);
+        utils::GetPCDSequence(argv[1], seq);
         std::cout<<"Find "<< seq.size()<<" point clouds."<<std::endl;        
         visualization::Visualizer visualizer;        
         Frame last_frame;
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
         std::string method = argv[2];
         for(size_t i = 0; i != seq.size(); ++i)
         {
-            io::LoadPCD(seq[i], pcd);
+            utils::LoadPCD(seq[i], pcd);
             Frame current_frame;
             current_frame.SetPCD(pcd);
             SE3 T;
@@ -51,14 +51,14 @@ int main(int argc, char **argv)
             std::cout<<"frame id: "<<i<<global_T.log().transpose()<<std::endl;
             last_frame = current_frame;
         }
-        io::WritePLY("./odometry_test_"+method+".ply", global_pcd_rgb);
+        utils::WritePLY("./odometry_test_"+method+".ply", global_pcd_rgb);
     }
     else if(argc == 4)
     {
         PointCloud source, target;
         Frame sf, tf;
-        io::LoadPCD(argv[1], source);
-        io::LoadPCD(argv[2], target);
+        utils::LoadPCD(argv[1], source);
+        utils::LoadPCD(argv[2], target);
         sf.SetPCD(source);
         tf.SetPCD(target);   
         LidarOdometry lo;

@@ -1,6 +1,6 @@
 #ifndef RABBIT_LIDAR_ODOMETRY_H
 #define RABBIT_LIDAR_ODOMETRY_J
-#include "Util.h"
+#include "Utils/Util.h"
 #include "Frame.h"
 #include <pcl/registration/ndt.h>
 #include <pcl/registration/sample_consensus_prerejective.h>
@@ -9,7 +9,14 @@
 
 namespace rabbit
 {
-    
+    struct Correspondence
+    {
+        int source_id;
+        int target_id;
+        bool matching_success;
+        // from source to target
+        SE3 relative_pose;
+    };
     class LidarOdometry
     {
         public: 

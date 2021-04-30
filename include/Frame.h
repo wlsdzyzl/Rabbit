@@ -1,6 +1,6 @@
 #ifndef RABBIT_FRAME_H
 #define RABBIT_FRAME_H
-#include "Util.h"
+#include "Utils/Util.h"
 #include <pcl/features/vfh.h>
 #include <pcl/features/fpfh.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -26,11 +26,14 @@ namespace rabbit
         pcl::KdTreeFLANN<PointType>::Ptr less_sharp_kdtree;
         pcl::KdTreeFLANN<PointType>::Ptr less_flat_kdtree;
         // matching on range image
-
+        // for ros bag
+        double timestamp;
         RangeImSphPtr range_image;
         std::vector<int> keypoint_indices;
         PCDNARFPtr narf_deps;
-
+        // from camera coordinate to world coordinate
+        SE3 pose;
+        bool is_keyframe = false;
         void LoadFromMsg(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg);
         void SetPCD(const PointCloud &_pcd);
         void ComputeNormal();
