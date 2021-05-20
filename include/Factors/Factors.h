@@ -8,7 +8,7 @@ Also, we will define pose 2 pose, based on sophus.
 #include "LocalParameterization.h"
 namespace rabbit
 {
-namespace factors
+namespace factor
 {
     struct Point2LineFactor
     {

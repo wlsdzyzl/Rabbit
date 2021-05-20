@@ -1,7 +1,8 @@
-#include "IO.h"
+#include "Utils/IO.h"
 #include "Frame.h"
 #include "Visualization.h"
 using namespace rabbit;
+using namespace util;
 int main(int argc, char **argv)
 {
     if(argc != 2)
@@ -12,13 +13,13 @@ int main(int argc, char **argv)
     if(DirExists(argv[1]))
     {
         std::vector<std::string> seq; 
-        io::GetPCDSequence(argv[1], seq);
+        GetPCDSequence(argv[1], seq);
         std::cout<<"Find "<< seq.size()<<" point clouds."<<std::endl;        
         visualization::Visualizer visualizer;
         for(size_t i = 0; i != seq.size(); ++i)
         {
             PointCloud pcd; 
-            io::LoadPCD(seq[i], pcd);
+            LoadPCD(seq[i], pcd);
             Frame frame; 
             frame.SetPCD(pcd);
             frame.CreateRangeImage();
@@ -30,7 +31,7 @@ int main(int argc, char **argv)
     else
     {
         PointCloud pcd; 
-        io::LoadPCD(argv[1], pcd);
+        LoadPCD(argv[1], pcd);
         Frame frame; 
         frame.SetPCD(pcd);
         frame.CreateRangeImage();

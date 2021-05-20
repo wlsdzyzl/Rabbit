@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sophus/se3.hpp>
 #include <sophus/sim3.hpp>
 
-#include <basalt/utils/assert.h>
-#include <basalt/utils/eigen_utils.hpp>
+#include "Utils/assert.h"
+#include "Utils/eigen_utils.hpp"
 
 namespace Sophus {
 

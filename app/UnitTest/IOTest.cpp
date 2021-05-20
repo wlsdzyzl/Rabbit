@@ -1,5 +1,6 @@
-#include "IO.h"
+#include "Utils/IO.h"
 using namespace rabbit;
+using namespace util;
 int main(int argc, char **argv)
 {
     if(argc > 1)
@@ -7,7 +8,7 @@ int main(int argc, char **argv)
         if(DirExists(argv[1]))
         {
             std::vector<std::string> seq; 
-            io::GetPCDSequence(argv[1], seq);
+            GetPCDSequence(argv[1], seq);
             std::cout<<"Find "<< seq.size()<<" point clouds."<<std::endl;
             std::vector<int> has_pcd(seq.size(), -1);
             int max_id = -1;

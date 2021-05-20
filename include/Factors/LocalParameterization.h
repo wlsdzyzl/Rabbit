@@ -4,12 +4,12 @@
 #include <ceres/rotation.h>
 #include <eigen3/Eigen/Dense>
 #include <pcl/kdtree/kdtree_flann.h>
-#include "Utils/Util.h"
+#include "Utils/Utils.h"
 #include <sophus/interpolate.hpp>
 #include <ceres/local_parameterization.h>
 namespace rabbit
 {
-namespace factors
+namespace factor
 {
 
     class LocalParameterizationSE3 : public ceres::LocalParameterization 
@@ -57,6 +57,7 @@ namespace factors
         //
         //  T * exp(x)
         //
+        // for updating
         virtual bool Plus(double const* T_raw, double const* delta_raw,
                             double* T_plus_delta_raw) const {
             Eigen::Map<SO3 const> const T(T_raw);

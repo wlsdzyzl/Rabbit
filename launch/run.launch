@@ -1,0 +1,12 @@
+<launch>
+    <!-- <node pkg="lego_loam" type="imageProjection" name="imageProjection" output="screen">
+        <remap from="/velodyne_points" to="/top/rslidar_points"/>
+    </node> -->
+    <node pkg="rabbit" type="run" name="run" output="screen" />
+
+    <arg name="rviz" default="true" />
+    <group if="$(arg rviz)">
+        <node launch-prefix="nice" pkg="rviz" type="rviz" name="rviz" args="-d $(find rabbit)/launch/rviz.rviz" />
+    </group>
+
+</launch>

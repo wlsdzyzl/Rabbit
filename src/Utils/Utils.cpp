@@ -1,8 +1,10 @@
-#include "Utils/Util.h"
+#include "Utils/Utils.h"
 #include <boost/filesystem.hpp>
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/approximate_voxel_grid.h>
 namespace rabbit
+{
+namespace util
 {
     std::vector<std::string> Split(const std::string &str, const std::string &delim, int split_times)
     {
@@ -268,4 +270,5 @@ namespace rabbit
         approximate_voxel_filter.setInputCloud (in_ptr);
         approximate_voxel_filter.filter (cloud_out);
     }
+}
 }

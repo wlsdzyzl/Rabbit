@@ -1,6 +1,6 @@
 #include "Frame.h"
 #include <cmath>
-#include <pcl/filters/voxel_grid.h>
+// #include <pcl/filters/voxel_grid.h>
 namespace rabbit
 {
     float cloud_curvature[400000];
@@ -71,15 +71,6 @@ namespace rabbit
     //     // Compute the features
     //     vfh_filter.compute (*vfh);
     // }
-    void Frame::LoadFromMsg(const sensor_msgs::PointCloud2ConstPtr &laser_cloudMsg)
-    {
-        pcd = PointCloudPtr( new PointCloud ());
-        pcl::fromROSMsg(*laser_cloudMsg, *pcd);
-        std::vector<int> indices;
-        // prepropose
-        pcl::removeNaNFromPointCloud(*pcd, *pcd, indices);
-        RemoveClosedPointCloud(*pcd, *pcd, mininum_range);
-    }
     void Frame::SetPCD(const PointCloud &_pcd)
     {
         pcd = PointCloudPtr ( new PointCloud (_pcd));

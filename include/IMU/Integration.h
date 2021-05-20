@@ -1,38 +1,52 @@
 #ifndef  RABBIT_PREINTEGRATION_H
 #define RABBIT_PREINTEGRATION_H
-#include "Utils/Util.h"
-#include "Utils/MathUtil.h"
+#include "Utils/Utils.h"
 #include "IMU/IMUFrame.h"
 
 namespace rabbit
 {
 namespace imu
 {
-    class IMUPreintegrator
+    using namespace util;
+    class IMUIntegrator
     {
-        using namespace utils;
         public:
-        IMUPreintegrator() = default;
-        Preintegrate(const Vec3 &gyr, const Vec3 &acc,  double delta_t);
-        Preintegrate(const std::vector<IMUFrame> &imu_frame_list,  int start, int end)
+        IMUIntegrator() = default;
+        void Preintegrate(const Vec3 &gyr, const Vec3 &acc,  double delta_t);
+        void Preintegrate(const std::vector<IMUFrame> &imu_frame_list,  int start, int end)
         {
             Reset();
             
             for(int i = start; i != end; ++i)
             {
-                double delta_t =  1.0 / IMU_FREQUENCY;
+                double delta_t =  1.0 / IMUFrame::imu_frequency;
                 if(end < imu_frame_list.size())
                 delta_t = imu_frame_list[i+1].timestamp - imu_frame_list[i].timestamp;
                 if(delta_t <= 0)
                 {
-                    std::cout<<YELLOW<<"[WARNING]::[IMUPreintegration]::Delta_t <= 0. So the delta will be reset to "<<1.0 / IMU_FREQUENCY<<"."<<RESET<<std::endl;
-                    delta_t =  1.0 / IMU_FREQUENCY;
+                    std::cout<<YELLOW<<"[WARNING]::[IMUPreintegration]::Delta_t <= 0. So the delta will be reset to "<<1.0 / IMUFrame::imu_frequency<<"."<<RESET<<std::endl;
+                    delta_t =  1.0 / IMUFrame::imu_frequency;
                 }
                 Preintegrate(imu_frame_list[i].angular_velocity, imu_frame_list[i].acceleration,delta_t);
             }
         }
-        void UpdateBias(const Vec3 &delta_ba, const Vec3 &delta_bg);
-        void SetInitialBias();
+        void Integrate(const Vec3 &gyr, const Vec3 &acc,  double delta_t)
+        {
+             //euler integration
+            
+            //  std::cout<<"delta_t: "<<delta_t<<" "
+            //     <<(delta_v).transpose()<<std::endl;
+            std::cout<<"dt: "<<(acc - ba).transpose()<<" "<<(gyr - bg).transpose()<<std::endl;
+            delta_p += delta_v * delta_t + 0.5 * delta_t * delta_t * IMUFrame::gravity  +  0.5 * delta_t * delta_t * delta_R * (acc - ba );
+            delta_v += delta_t * delta_R * (acc - ba) + delta_t * IMUFrame::gravity;
+            delta_R *= SO3::exp((gyr - bg) * delta_t).matrix();           
+        }
+        void UpdateBias(const Vec3 &delta_bg, const Vec3 &delta_ba);
+        void SetInitialBias(const Vec3 &_bg, const Vec3 &_ba)
+        {
+            bg = _bg;
+            ba = _ba;
+        }
         void SetNoiseCov(const Mat3 &gyro_noise_cov, const Mat3 &acc_noise_cov, const Mat3 &integration_cov_ = Mat3::Zero())
         {
             white_noise_cov_g = gyro_noise_cov;
@@ -42,7 +56,7 @@ namespace imu
         // Mat9 ComputeJacobian();
         void Reset()
         {
-            delta_R = SO3();
+            delta_R = Mat3::Identity();
             delta_v.setZero();
             delta_p.setZero();
             covariance.setZero();
@@ -55,7 +69,7 @@ namespace imu
             ba.setZero();
         }
         // rotation
-        SO3 delta_R = SO3();
+        Mat3 delta_R = Mat3::Identity();
         // velocity
         Vec3 delta_v = Vec3::Zero();
         // position
@@ -78,8 +92,6 @@ namespace imu
         bool compute_covariance = true;
         bool compute_jacobian = true;
         // we also need to consider the noise model.
-        int source_id = -1;
-        int target_id = -1;
     };
 }
 }

@@ -1,5 +1,5 @@
 #include "Odometry.h"
-#include "Residual.hpp"
+#include "Factors/Factors.h"
 namespace rabbit
 {
     bool LidarOdometry::NDT(const Frame &source, const Frame &target, SE3 &T)
@@ -114,7 +114,7 @@ namespace rabbit
             ceres::LossFunction *loss_function = new ceres::HuberLoss(0.1);
             ceres::Problem::Options problem_options;
             ceres::Problem problem(problem_options);
-            problem.AddParameterBlock(T.data(), SE3::num_parameters, new LocalParameterizationSE3);
+            problem.AddParameterBlock(T.data(), SE3::num_parameters, new factor::LocalParameterizationSE3);
 
             PointType point_sel;
             std::vector<int> point_ids;
@@ -202,7 +202,7 @@ namespace rabbit
                     Vec3 last_point_b(source_less_sharp_points->points[min_point_id].x,
                                                     source_less_sharp_points->points[min_point_id].y,
                                                     source_less_sharp_points->points[min_point_id].z);
-                    ceres::CostFunction *cost_function = Point2LineFactor::Create(curr_point, last_point_a, last_point_b, s);
+                    ceres::CostFunction *cost_function = factor::Point2LineFactor::Create(curr_point, last_point_a, last_point_b, s);
                     problem.AddResidualBlock(cost_function, loss_function, T.data());
                     edge_corres_num++;
                 }
@@ -300,7 +300,7 @@ namespace rabbit
                         Vec3 last_point_c(source_less_flat_points->points[min_point_id_2].x,
                                                         source_less_flat_points->points[min_point_id_2].y,
                                                         source_less_flat_points->points[min_point_id_2].z);
-                        ceres::CostFunction *cost_function = Point2PlaneFactor::Create(curr_point, last_point_a, last_point_b, last_point_c, s);
+                        ceres::CostFunction *cost_function = factor::Point2PlaneFactor::Create(curr_point, last_point_a, last_point_b, last_point_c, s);
                         problem.AddResidualBlock(cost_function, loss_function, T.data());
                         plane_corres_num++;
                     }

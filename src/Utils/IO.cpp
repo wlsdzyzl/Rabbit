@@ -3,7 +3,7 @@
 #include <algorithm>
 namespace rabbit
 {
-    namespace utils
+    namespace util
     {
          void LoadPCD(const std::string &filename, PointCloud &pcd)
          {

@@ -2,11 +2,10 @@
 #define RABBIT_IMU_FACTOR_H
 namespace rabbit
 {
-namespace imu
+namespace factor
 {
     // define residual of IMU pre-integration measurements
-    // define preintegration factors
-    
+    // define preintegration factor::
 }
 }
 #endif
