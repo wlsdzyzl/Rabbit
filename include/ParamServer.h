@@ -91,7 +91,7 @@ namespace rabbit
 
         ParamServer()
         {
-            nh.param<std::string>("rabbit/pcd", pcd_topic, "points_raw");
+            nh.param<std::string>("rabbit/pcd", pcd_topic, "/top/rslidar_points");
             nh.param<std::string>("rabbit/imu", imu_topic, "imu_raw");
             nh.param<std::string>("rabbit/odometry", odometry_topic, "odometry/imu");
             

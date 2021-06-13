@@ -28,7 +28,7 @@ catkin_package(
 
 include_directories(
 	include
-  3rdparty/ScanContext
+  3rdparty
 	${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
@@ -39,7 +39,7 @@ include_directories(
 file(GLOB_RECURSE SRC
 "src/*.cpp"
 "src/*.cc"
-"ScanContext/*.cpp"
+"3rdparty/*.cpp"
 )
 
 link_directories(
@@ -74,3 +74,7 @@ target_link_libraries(OdometryTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES
 add_executable(IMUTest app/UnitTest/IMUTest.cpp)
 add_dependencies(IMUTest ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(IMUTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+
+add_executable(RabbitRun app/RUN/Run.cpp)
+add_dependencies(RabbitRun ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(RabbitRun librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})

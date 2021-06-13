@@ -402,7 +402,7 @@ std::vector<ScanTuple> SCManager::detectLoopClosureIDs ( void )
      */
     std::sort(results.begin(), results.end(), [](const ScanTuple &a, const ScanTuple &b)
     { 
-        std::get<2>(a) < std::get<2>(b);
+        return std::get<2>(a) < std::get<2>(b);
     });
 
     return results;

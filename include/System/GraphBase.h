@@ -15,11 +15,13 @@ namespace system
         public:
         GraphBase():lcdetector(keyframe_list){}
         //check the pose difference to decide if we should add a new keyframe
-        bool NewKeyframe();
+        bool NewKeyframe(const SE3 &delta_pose);
         void AddNewFrame(const Frame &f);
         void Optimize();
+        bool IsKeyframeInserted(){return keyframe_list.back().frame_id == (relative_pose_list.size() - 1);}
         SE3List relative_pose_list;
         std::vector<Frame> keyframe_list;
+        std::vector<optimization::FrameCorrespondence> keyframe_corrs;
         LidarOdometry odometry;
         double angle_threshold = 10;
         double distance_threshold =1.0; 

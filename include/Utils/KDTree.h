@@ -1,7 +1,7 @@
 #ifndef RABBIT_KDTREE_H
 #define RABBIT_KDTREE_H
 #include "Utils/Utils.h"
-#include "nanoflann.hpp"
+#include "nanoflann/nanoflann.hpp"
 #include <memory>
 //use nanoflann library
 namespace rabbit

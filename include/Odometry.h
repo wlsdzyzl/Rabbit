@@ -1,5 +1,5 @@
 #ifndef RABBIT_LIDAR_ODOMETRY_H
-#define RABBIT_LIDAR_ODOMETRY_J
+#define RABBIT_LIDAR_ODOMETRY_H
 #include "Utils/Utils.h"
 #include "Frame.h"
 #include <pcl/registration/ndt.h>

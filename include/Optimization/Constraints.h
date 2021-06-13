@@ -28,9 +28,9 @@ namespace optimization
         int old_imu_id = -1;
         int new_frame_id = -1;
         int new_imu_id = -1;
-        imu::IMUIntegration;
+        imu::IMUIntegrator imu_preintegrator;
         bool is_valid = false;
-    }
+    };
 }
 }
 #endif

@@ -349,10 +349,10 @@ namespace rabbit
         less_sharp_kdtree->setInputCloud(less_sharp_points);
         less_flat_kdtree->setInputCloud(less_flat_points);    
 
-        std::cout<<BLUE<<"[INFO]::[LoamFeature]::\nSharp points: "<<sharp_points->points.size()
-            <<"\nLess sharp points: "<<less_sharp_points->points.size()
-            <<"\nFlat points: "<<flat_points->points.size()
-            <<"\nLess flat points: "<<less_flat_points->points.size()<<RESET<<std::endl;
+        // std::cout<<BLUE<<"[INFO]::[LoamFeature]::\nSharp points: "<<sharp_points->points.size()
+        //     <<"\nLess sharp points: "<<less_sharp_points->points.size()
+        //     <<"\nFlat points: "<<flat_points->points.size()
+        //     <<"\nLess flat points: "<<less_flat_points->points.size()<<RESET<<std::endl;
     }
 
     void Frame::CreateRangeImage()

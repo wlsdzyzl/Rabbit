@@ -63,8 +63,7 @@ namespace imu
             white_noise_cov_g.setZero();
             white_noise_cov_a.setZero();
             integration_cov.setZero();
-            source_id = -1;
-            target_id = -1;
+
             bg.setZero();
             ba.setZero();
         }

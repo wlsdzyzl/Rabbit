@@ -2,6 +2,8 @@
 #define FACTOR_GRAPH_H
 // factor graph means we could have imu pre-integration
 #include "Factors/Factors.h"
+#include "Frame.h"
+#include "Optimization/Constraints.h"
 namespace rabbit
 {
 namespace optimization

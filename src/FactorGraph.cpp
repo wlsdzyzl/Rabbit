@@ -4,7 +4,7 @@ namespace rabbit
 {
 namespace optimization
 {
-    void Optimizer::Optimize(std::vector<Frame> &frame_list, const std::vector<FrameCorrespondence> &frame_corrs)
+    void Optimizer::Optimize(std::vector<Frame> &frame_list, const std::vector<FrameCorrespondence> &frame_corres)
     {
         ceres::LossFunction *loss_function = new ceres::HuberLoss(0.1);
         ceres::Problem::Options problem_options;
@@ -12,10 +12,10 @@ namespace optimization
         for(size_t i = 0; i != frame_list.size(); ++i)
         {
             problem.AddParameterBlock(frame_list[i].pose.data(), SE3::num_parameters, 
-                new factor::LocalParameterization() );
+                new factor::LocalParameterizationSE3() );
         }
 
-        for(size_t i = 0; i != frame_corrs.size(); ++i)
+        for(size_t i = 0; i != frame_corres.size(); ++i)
         {
             if(frame_corres[i].is_valid)
             {
@@ -23,7 +23,7 @@ namespace optimization
                 int old_id = frame_corres[i].old_id;
                 // relative_pose: from target to source
                 ceres::CostFunction *cost_function = 
-                    factor::PoseEdgeFactor::Create(frame_corres.relative_pose);
+                    factor::PoseEdgeFactor::Create(frame_corres[i].relative_pose);
                 problem.AddResidualBlock(cost_function, loss_function, frame_list[new_id].pose.data(), frame_list[old_id].pose.data());
             }
         }
@@ -34,7 +34,7 @@ namespace optimization
         ceres::Solver::Summary summary;
         ceres::Solve(options, &problem, &summary);
     }
-    void Optimizer::Optimize(std::vector<Frame> &frame_list, const std::vector<FrameCorrespondence> &frame_corrs, const std::vector<IMUConstraint> &imu_constraints)
+    void Optimizer::Optimize(std::vector<Frame> &frame_list, const std::vector<FrameCorrespondence> &frame_corres, const std::vector<IMUConstraint> &imu_constraints)
     {
     }
 }

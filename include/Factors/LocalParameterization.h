@@ -5,12 +5,14 @@
 #include <eigen3/Eigen/Dense>
 #include <pcl/kdtree/kdtree_flann.h>
 #include "Utils/Utils.h"
+
 #include <sophus/interpolate.hpp>
 #include <ceres/local_parameterization.h>
 namespace rabbit
 {
 namespace factor
 {
+    using namespace util;
 
     class LocalParameterizationSE3 : public ceres::LocalParameterization 
     {
@@ -71,6 +73,7 @@ namespace factor
         //
         // Dx T * exp(x)  with  x=0
         //
+        // for compute the delta
         virtual bool ComputeJacobian(double const* T_raw,
                                     double* jacobian_raw) const {
             Eigen::Map<SO3 const> T(T_raw);

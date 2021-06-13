@@ -154,7 +154,7 @@ namespace util
             if(values[i] < min_value) min_value = values[i];
             if(values[i] > max_value) max_value = values[i];
         }
-        std::cout<<BLUE<<"[INFO]::[ColorRemapping]::Min value: "<<min_value<<", Max value:"<<max_value<<RESET<<std::endl;
+        // std::cout<<BLUE<<"[INFO]::[ColorRemapping]::Min value: "<<min_value<<", Max value:"<<max_value<<RESET<<std::endl;
         std::vector<int> histogram(COLOR_RANGE, 0);
         std::vector<int> color_id;
         for(size_t i = 0; i != values.size(); ++i)

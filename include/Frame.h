@@ -36,7 +36,6 @@ namespace rabbit
         // from camera coordinate to world coordinate
         // from current to last
         SE3 pose;
-        bool is_keyframe = false;
         Frame() = default;
         Frame(const sensor_msgs::PointCloud2 &laser_cloud_msg)
         {
@@ -48,15 +47,15 @@ namespace rabbit
             RemoveClosedPointCloud(*pcd, *pcd, mininum_range);
             timestamp = MsgTime(laser_cloud_msg);            
         }
-        Frame(const sensor_msgs::PointCloud2 &laser_cloud_msg)
+        Frame(const PointCloud &_pcd)
         {
-            pcd = PointCloudPtr( new PointCloud ());
-            pcl::fromROSMsg(laser_cloud_msg, *pcd);
+            pcd = PointCloudPtr( new PointCloud (_pcd));
+            
             std::vector<int> indices;
             // prepropose
             pcl::removeNaNFromPointCloud(*pcd, *pcd, indices);
             RemoveClosedPointCloud(*pcd, *pcd, mininum_range);
-            timestamp = MsgTime(laser_cloud_msg);            
+            // timestamp = MsgTime(laser_cloud_msg);            
         }
         // void LoadFromMsg(const sensor_msgs::PointCloud2 &laser_cloud_msg);
         void SetPCD(const PointCloud &_pcd);

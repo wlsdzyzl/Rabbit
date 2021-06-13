@@ -17,7 +17,7 @@ namespace rabbit
     class LCDetector
     {
         public:
-        LCDetector(std::vector<Frame> &_frame_list, double _filter_size):frame_list(_frame_list), filter_size(_filter_size)
+        LCDetector(std::vector<Frame> &_frame_list, double _filter_size = 0.5):frame_list(_frame_list), filter_size(_filter_size)
         {
             down_size_filter.setLeafSize(filter_size, filter_size, filter_size);
         }
@@ -32,7 +32,7 @@ namespace rabbit
             Frame &f = frame_list.back();
 
             // use kdtree to find the cloest frames.
-            std::vector<Vec3> positions;
+            Vec3List positions;
             KDTree<> kdtree;
             for(int i = 0; i< (int)(frame_list.size()) - neighbor_size ; ++ i)
             {
@@ -48,11 +48,11 @@ namespace rabbit
         // based on Scan Context
         void SCDetection(std::vector<int> &candidates)
         {
-            PointType downsized_pcd;
+            PointCloud downsized_pcd;
             Frame &f = frame_list.back();
 
             if(frame_list.size() !=sc_manager.database_size() )
-            down_size_filter.setInputCloud(*f.pcd);
+            down_size_filter.setInputCloud(f.pcd);
             down_size_filter.filter(downsized_pcd);
 
             sc_manager.makeAndSaveScancontextAndKeys(downsized_pcd);
@@ -84,6 +84,6 @@ namespace rabbit
         int neighbor_size;
         double radius = 5.0;
         // int max_results = 20;
-    }
+    };
 }
 #endif
