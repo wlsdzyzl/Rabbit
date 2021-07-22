@@ -328,7 +328,7 @@ namespace system
                         Frame &candidate_frame = keyframe_list[candidate_ids[id]];
                         SE3 loop_relative_T = candidate_frame.pose.inverse() * f.pose; 
                         // std::cout<<loop_relative_T.matrix()<<"\n------------------"<<std::endl;
-                        bool mapping_success_tmp = odometry.ICP(f, candidate_frame, loop_relative_T);
+                        bool mapping_success_tmp = Matching(f, candidate_frame, loop_relative_T);
                         
                         // check if the closed loop is correct;
                         if(mapping_success_tmp)
@@ -374,11 +374,14 @@ namespace system
                             FilterPCD(*sliding_window_volume.less_sharp_points,  
                                 *sliding_window_volume.less_sharp_points, sharp_leaf_size, 
                                     sharp_leaf_size, sharp_leaf_size);
-
+                            
                             FilterPCD(*sliding_window_volume.less_flat_points,  
                                 *sliding_window_volume.less_flat_points, flat_leaf_size, 
                                 flat_leaf_size, flat_leaf_size);
-                            
+
+                            FilterPCD(*sliding_window_volume.pcd,  
+                                *sliding_window_volume.pcd, flat_leaf_size, 
+                                flat_leaf_size, flat_leaf_size);
                             sliding_window_volume.less_sharp_kdtree =
                                 pcl::KdTreeFLANN<PointType>::Ptr (new pcl::KdTreeFLANN<PointType>());
                             sliding_window_volume.less_flat_kdtree =

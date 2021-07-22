@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
     if(argc < 2)
     {
-        std::cout<<"usage: RunPCD [pcd_folder] [matching_method = loam] [mapping_method = icp] [sliding_window = 1]"<<std::endl;
+        std::cout<<"usage: RunPCD [pcd_folder] [matching_method = loam] [mapping_method = icp] [sliding_window = 1] [lcd_detection] = 0"<<std::endl;
         return 0;
     }
 
@@ -21,12 +21,15 @@ int main(int argc, char **argv)
     std::string matching_method = "loam";
     std::string mapping_method = "loam";
     int sliding_window_type = 1;
+    int lcd_detection = 0;
     if(argc > 2) matching_method = argv[2];
     if(argc > 3) mapping_method = argv[3];
     if(argc > 4) sliding_window_type = atoi(argv[4]);
+    if(argc > 5) lcd_detection = atoi(argv[5]);
     sys.SetMatchingMethod(matching_method);
     sys.SetMappingMethod(mapping_method);
     sys.SetSlidingWindow(sliding_window_type);
+    sys.lcd_detection = lcd_detection;
     std::vector<std::string> seq; 
     GetPCDSequence(argv[1], seq);    
     std::cout<<"Find "<< seq.size()<<" point clouds."<<std::endl;        
@@ -96,8 +99,10 @@ int main(int argc, char **argv)
             ColorizePointCloud(pcd, Vec3f(1, 1, 0), pcd_rgb);
             global_pcd_rgb += pcd_rgb;            
             visualizer.SetPCD(global_pcd_rgb);    
-            WritePLY("global_pcd_rgb_"+matching_method+"_"+mapping_method+std::to_string(sliding_window_type)+".ply", global_pcd_rgb);
-            WritePLY("global_pcd_"+matching_method+"_"+mapping_method+std::to_string(sliding_window_type)+".ply", global_pcd);
+            WritePLY("global_pcd_rgb_"+matching_method+"_"+mapping_method+
+                "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+".ply", global_pcd_rgb);
+            WritePLY("global_pcd_"+matching_method+"_"+mapping_method+
+                "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+".ply", global_pcd);
 
         }
         visualizer.ShowOnce();        
