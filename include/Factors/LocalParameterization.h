@@ -6,7 +6,7 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include "Utils/Utils.h"
 
-#include <sophus/interpolate.hpp>
+#include "sophus/interpolate.hpp"
 #include <ceres/local_parameterization.h>
 namespace rabbit
 {

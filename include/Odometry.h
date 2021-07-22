@@ -62,9 +62,14 @@ namespace rabbit
         bool TeaserPP(const Frame &source, const Frame &target, SE3 &T);
 
         // feature based. however, the feature is  based on the distance from point to line and point to plane
-        // It can be a litter difficult to apply ransac on such correspondence (of couse we can, but it may need extra work)
-        // We use g2o to get a reasonable estimation.
+        // line (2 points), plane (3 points)
         bool Loam(const Frame &source, const Frame &target, SE3 &T);
+        
+
+        // feature based. similar to loam mapping, here we still use distance from point to line and point to plane
+        // however, in mapping case, source will have a larger volume, therefore
+        // we use multiple points to fitting a line and plane.
+        bool LoamMapping(const Frame &source, const Frame &volume, SE3 &T);
 
         protected:
         pcl::NormalDistributionsTransform<PointType, PointType> ndt;
@@ -75,8 +80,10 @@ namespace rabbit
         float leaf_size = 0.2;
         float scan_period = 0.1;
         float dist_threshold = 25;
+        float mapping_dist_threshold = 1.0;
         bool undistorted = false;
         float nearby_num = 2.5; 
+        float mean_dist_threshold = 5;
 
     };
     // ndt (voxel based method)

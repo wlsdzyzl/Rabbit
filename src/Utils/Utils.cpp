@@ -101,6 +101,21 @@ namespace util
         }
         return true;
     }
+    bool DeleteAndMakeDir(const std::string & folder_name)
+    {
+        if(DirExists(folder_name))
+        {
+            boost::filesystem::path p(folder_name.c_str());
+            boost::filesystem::remove_all(p);           
+        }
+        const int dir_err = mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if (-1 == dir_err)
+        {
+            std::cout<<RED<<"[ERROR]::[MakeDir]::Error creating directory!"<<RESET<<std::endl;
+            return false;
+        }
+        return true;        
+    }
     void ListFileNames(const std::string &folder_name, std::vector<std::string> &filenames)
     {
         filenames.clear();

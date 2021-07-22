@@ -81,8 +81,8 @@ namespace rabbit
         double filter_size = 0.5; 
         pcl::VoxelGrid<PointType>  down_size_filter;
         size_t max_candidate_size = 5;
-        int neighbor_size;
-        double radius = 5.0;
+        int neighbor_size = 25;
+        double radius = 10.0;
         // int max_results = 20;
     };
 }

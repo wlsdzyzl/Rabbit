@@ -53,28 +53,36 @@ add_library(librabbit SHARED ${SRC})
 
 add_executable(IOTest app/UnitTest/IOTest.cpp)
 add_dependencies(IOTest ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(IOTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(IOTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
 
 add_executable(ReadPCD app/ReadPCD.cpp)
 add_dependencies(ReadPCD ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(ReadPCD librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(ReadPCD librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
 
 add_executable(PCD2PLY app/PCD2PLY.cpp)
 add_dependencies(PCD2PLY ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(PCD2PLY librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(PCD2PLY librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
 
 add_executable(FrameTest app/UnitTest/FrameTest.cpp)
 add_dependencies(FrameTest ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(FrameTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(FrameTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
 
 add_executable(OdometryTest app/UnitTest/OdometryTest.cpp)
 add_dependencies(OdometryTest ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(OdometryTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(OdometryTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
 
 add_executable(IMUTest app/UnitTest/IMUTest.cpp)
 add_dependencies(IMUTest ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(IMUTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(IMUTest librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
 
 add_executable(RabbitRun app/RUN/Run.cpp)
 add_dependencies(RabbitRun ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(RabbitRun librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES})
+target_link_libraries(RabbitRun librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
+
+add_executable(RabbitRunPCD app/RUN/RunPCD.cpp)
+add_dependencies(RabbitRunPCD ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(RabbitRunPCD librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )
+
+add_executable(Bag2PCD app/Bag2PCD.cpp)
+add_dependencies(Bag2PCD ${catkin_EXPORTED_TARGETS} )
+target_link_libraries(Bag2PCD librabbit ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${CERES_LIBRARIES} )

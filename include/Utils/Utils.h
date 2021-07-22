@@ -61,6 +61,7 @@ namespace util
     bool FileExists(const std::string & file_name);
     bool Exists(const std::string &f);
     bool MakeDir(const std::string & folder_name);
+    bool DeleteAndMakeDir(const std::string & folder_name);
     std::string AbsolutePath(const std::string &f);
     void ListFileNames(const std::string &folder_name, std::vector<std::string> &files);
     void ListFilePaths(const std::string &folder_name, std::vector<std::string> &filepaths);

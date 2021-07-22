@@ -9,18 +9,21 @@ namespace optimization
     struct FrameCorrespondence
     {
         FrameCorrespondence() = default;
-        FrameCorrespondence(int nid = -1, int oid = -1, util::SE3 rp = util::SE3(), bool is_v = false)
+        FrameCorrespondence(int nid = -1, int oid = -1, util::SE3 rp = util::SE3(), bool is_v = false,
+            double w_ = 1.0)
         {
             new_id = nid;
             old_id = oid;
             relative_pose = rp;
             is_valid = is_v;
+            weight = w_;
         }
         int new_id = -1;
         int old_id = -1;
         // from  new frame to old frame
         util::SE3 relative_pose; 
         bool is_valid = false;
+        double weight = 1.0;
     };
     struct IMUConstraint
     {

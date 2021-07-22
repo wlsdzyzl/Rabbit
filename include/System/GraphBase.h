@@ -2,33 +2,117 @@
 #define RABBIT_GRAPH_BASE_H
 #include "Frame.h"
 #include "Odometry.h"
-#include  "LCDetection.h"
+#include "LCDetection.h"
 #include "Optimization/FactorGraph.h"
-
+#include "MovingBox.h"
 namespace rabbit
 {
 namespace system
 {
+    enum OdometryMethod
+    {
+        NDT,
+        ICP,
+        GICP,
+        LOAM
+    };
     using namespace util;
     class GraphBase
     {
         public:
-        GraphBase():lcdetector(keyframe_list){}
+        GraphBase():lcdetector(keyframe_list){};
+
+        void SetSlidingWindow(int type)
+        {
+            sliding_window_type = type;
+            if(type==2)
+            {
+                moving_box = MovingBox(sliding_window_cube_size_x,
+                    sliding_window_cube_size_y, 
+                    sliding_window_cube_size_z, 
+                    sliding_window_cube_len);
+            }
+        }
+        std::vector<int> GetFrameIDInSlidingWindow();
         //check the pose difference to decide if we should add a new keyframe
         bool NewKeyframe(const SE3 &delta_pose);
-        void AddNewFrame(const Frame &f);
+        void AddNewFrameSubmap(const Frame &f);
+        void AddNewFrameSlidingWindow(const Frame &f);
         void Optimize();
+        void OptimizeLocal();
         bool IsKeyframeInserted(){return keyframe_list.back().frame_id == (relative_pose_list.size() - 1);}
+        bool Matching(const Frame &s, const Frame &t, SE3 &T);
+        bool Mapping(const Frame &s, const Frame &t, SE3 &T);
+        void SetMatchingMethod(const std::string &m)
+        {
+            if(m == "loam")
+            matching_method = OdometryMethod::LOAM;
+            else if (m == "ndt")
+            matching_method = OdometryMethod::NDT;
+            else if (m == "icp")
+            matching_method = OdometryMethod::ICP;
+            else if(m == "gicp")
+            matching_method = OdometryMethod::GICP;
+            else
+            {
+                std::cout<<YELLOW<<"[WARNING]::[SetOdometry]::unsupported method. Use default: loam odometry."<<RESET<<std::endl;
+            }
+        }
+        int GetCubeID(const Vec3 &pos);
+        void SetMappingMethod(const std::string &m)
+        {
+            if(m == "loam")
+            mapping_method = OdometryMethod::LOAM;
+            else if (m == "ndt")
+            mapping_method = OdometryMethod::NDT;
+            else if (m == "icp")
+            mapping_method = OdometryMethod::ICP;
+            else if(m == "gicp")
+            mapping_method = OdometryMethod::GICP;
+            else
+            {
+                std::cout<<YELLOW<<"[WARNING]::[SetOdometry]::unsupported method. Use default: loam odometry."<<RESET<<std::endl;
+            }
+        }
         SE3List relative_pose_list;
         std::vector<Frame> keyframe_list;
+        
         std::vector<optimization::FrameCorrespondence> keyframe_corrs;
+        // local frame corrs, used to optimize local frames between two keyframe.
+        std::vector<optimization::FrameCorrespondence> frame_corrs;
         LidarOdometry odometry;
         double angle_threshold = 10;
         double distance_threshold =1.0; 
         double lcd_leaf_size = 0.5;
+        // 1. continuous frames
+        // 2. maintain a 3D cubes
+        // 0. without slide window, use submap
+        int sliding_window_type = 1;
+        int sliding_window_volume_n = 25;
+
+        size_t sliding_window_cube_size_x = 21;
+        size_t sliding_window_cube_size_y = 21;
+        size_t sliding_window_cube_size_z = 11;
+        // each cube volume is 50 * 50 * 50 m^3
+        double sliding_window_cube_len = 5;
+
+        double sharp_leaf_size = 0.4;
+        double flat_leaf_size = 0.5;
         optimization::Optimizer optimizer;
+        Frame sliding_window_volume;
+        Frame last_frame;
         LCDetector lcdetector;
         bool with_imu = false;
+        SE3 relative_T_to_last_frame;
+        SE3 relative_T_to_last_keyframe;
+        bool lcd_detection = false;
+        int min_mapping_n = 5;
+        // n keyframe will form a submap
+        int submap_len = 20;
+        MovingBox moving_box;
+        std::vector<Frame> submap_list;
+        OdometryMethod matching_method = OdometryMethod::LOAM;
+        OdometryMethod mapping_method = OdometryMethod::LOAM;
     };
 }
 }

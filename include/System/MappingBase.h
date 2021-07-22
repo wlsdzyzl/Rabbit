@@ -1,3 +1,0 @@
-#ifndef RABBIT_MAPPINGBASE_H
-#define RABBIT_MAPPINGBASE_H
-#endif

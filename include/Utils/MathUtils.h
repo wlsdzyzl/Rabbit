@@ -5,7 +5,7 @@
 #include <Eigen/StdVector>
 #include <Eigen/Eigenvalues> 
 #include <Eigen/Eigen>
-#include <sophus/se3.hpp>
+#include "sophus/se3.hpp"
 #include "sophus_utils.hpp"
 /*
 The file is part of rabbit. Some of the codes are adopted from Lio-mapping and vins-mono.
