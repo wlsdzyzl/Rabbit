@@ -25,8 +25,11 @@ namespace rabbit
         PointCloudPtr less_sharp_points;
         PointCloudPtr flat_points;
         PointCloudPtr less_flat_points;
+        PointCloudPtr ground_points;
+        PointCloudPtr less_ground_points;
         pcl::KdTreeFLANN<PointType>::Ptr less_sharp_kdtree;
         pcl::KdTreeFLANN<PointType>::Ptr less_flat_kdtree;
+        pcl::KdTreeFLANN<PointType>::Ptr less_ground_kdtree;
         // matching on range image
         // for ros bag
         double timestamp;
@@ -76,18 +79,23 @@ namespace rabbit
         static int less_sharp_points_n_each_part;
         static int flat_points_n_each_part;
         // static int less_flat_points_n_each_part = 20; 
+        static int ground_points_n;
         static int lidar_ring_n;
         static float mininum_range;
         // 10hz 
         static float scan_period;
-
+        static Vec3 ground_normal;
         // for range image
         static float angular_resolution_x;
         static float angular_resolution_y;
         static float max_angle_width;
         static float max_angle_height;
         static float support_size;
+        static bool ground_removal;
+        static bool ground_extraction;
         bool is_keyframe = false;
+        Vec3 ground_plane_normal;
+        double ground_plane_dist;
     };
 }
 #endif

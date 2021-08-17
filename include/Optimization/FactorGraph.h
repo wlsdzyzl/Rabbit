@@ -14,6 +14,9 @@ namespace optimization
         // only use lidar matching results
         void Optimize(std::vector<Frame> &frame_list, const std::vector<FrameCorrespondence> &frame_corrs,
             bool fix_begin = true, bool fix_end = false);
+            
+        void OptimizeWithGroundNormal(std::vector<Frame> &frame_list, const std::vector<FrameCorrespondence> &frame_corrs,
+            double ground_weight = 1.0, bool fix_begin = true, bool fix_end = false);
         void Optimize(std::vector<SE3> &pose_list, const std::vector<FrameCorrespondence> &frame_corres, 
             bool fix_begin = true, bool fix_end = false);
         // with imu and lidar results

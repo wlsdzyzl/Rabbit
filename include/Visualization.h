@@ -28,8 +28,33 @@ namespace visualization
             viewer->addPointCloud(pcdc_ptr, "pcdc");
             viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "pcdc");
 
-            viewer->addCoordinateSystem (1.0);
+            viewer->addCoordinateSystem (1.0, "coor");
             viewer->initCameraParameters ();
+        }
+        void SetOrigin(const SE3 &ori)
+        {
+            viewer->updateCoordinateSystemPose("coor", Eigen::Affine3f(ori.matrix().cast<float>()));
+            Vec3 current_pos = ori.translation();
+            Vec3 delta_pos = current_pos - follow_car_pos;
+            follow_car_pos = current_pos;
+
+            std::vector<pcl::visualization::Camera> cameras;
+            viewer->getCameras(cameras);
+
+            Vec3 pos = Vec3(cameras[0].pos[0], cameras[0].pos[1], cameras[0].pos[2]);
+            Vec3 focal = Vec3(cameras[0].focal[0], cameras[0].focal[1], cameras[0].focal[2]);
+            // std::cout<<pos.transpose()<<std::endl;
+            // std::cout<<focal.transpose()<<std::endl;
+            // std::cout<<view.transpose()<<std::endl;
+
+            pos += delta_pos;
+            focal += delta_pos;
+
+            viewer->setCameraPosition(
+                pos(0), pos(1), pos(2),
+                focal(0), focal(1), focal(2),
+                cameras[0].view[0], cameras[0].view[1], cameras[0].view[2]
+            );
         }
         // void SetPCD(const PCDXYZ &pcd)
         // {
@@ -87,6 +112,7 @@ namespace visualization
         PointCloudRGBPtr pcdc_ptr;
         // RangeImPtr rangeim_ptr;
         pcl::visualization::RangeImageVisualizer * widget_ptr = nullptr;
+        Vec3 follow_car_pos = Vec3(0, 0, 0);
     };
 }
 }

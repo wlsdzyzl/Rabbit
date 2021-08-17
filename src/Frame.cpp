@@ -15,6 +15,7 @@ namespace rabbit
     int Frame::sharp_points_n_each_part= 2;
     int Frame::less_sharp_points_n_each_part = 20;
     int Frame::flat_points_n_each_part = 4;
+    int Frame::ground_points_n = 25;
     // int less_flat_points_n_each_part = 20; 
     int Frame::lidar_ring_n = 16;
     float Frame::mininum_range = 0.1;
@@ -26,6 +27,10 @@ namespace rabbit
     float Frame::angular_resolution_y = Deg2Rad(2);
     float Frame::max_angle_width = Deg2Rad(360);
     float Frame::max_angle_height = Deg2Rad(30);
+    Vec3 Frame::ground_normal = Vec3(0, 0, 1);
+    bool Frame::ground_extraction = false;
+    bool Frame::ground_removal = true;
+
     void Frame::ComputeNormal()
     {
         normal = PCDNormalPtr(new PCDNormal ());
@@ -81,12 +86,14 @@ namespace rabbit
         // compute loam feature
         std::vector<int> scan_start_id(lidar_ring_n, -1);
         std::vector<int> scan_end_id(lidar_ring_n, -1);
+        std::set<int> ground_point_ids;
         // distinguish each ring
         int cloud_size = pcd->points.size();
         // compute the orientation horizontally
         float start_ori = -atan2(pcd->points[0].y, pcd->points[0].x);
         float end_ori = -atan2(pcd->points[cloud_size - 1].y,
                             pcd->points[cloud_size - 1].x) + 2 * M_PI;
+        int pixel_width = max_angle_width / angular_resolution_x;
         if (end_ori - start_ori > 3 * M_PI)
         {
             end_ori -= 2 * M_PI;
@@ -102,6 +109,15 @@ namespace rabbit
         PointType point;
         // put each point cloud into the corresponding scans. If we have a 16-line lidar, there will be 16 scans in each frame.
         std::vector<PointCloud> laser_cloud_scans(lidar_ring_n);
+        std::vector<std::vector<PointType>> laser_cloud_matrix(lidar_ring_n);
+        if(ground_extraction)
+        {
+            point.intensity = -1;
+            for(size_t i = 0; i != lidar_ring_n; ++i)
+            {
+                laser_cloud_matrix[i].resize(pixel_width, point);
+            }
+        }
         for (int i = 0; i < cloud_size; i++)
         {
             point.x = pcd->points[i].x;
@@ -180,22 +196,67 @@ namespace rabbit
             // the intensity here is not the intensity you thought. 
             // it records something about distortion
             float rel_time = (ori - start_ori) / (end_ori - start_ori);
+            int wid = rel_time * (pixel_width - 1);
+
+            // for extraction of ground points
+            if(ground_extraction)
+            {
+                point.intensity = laser_cloud_scans[scan_id].size();
+                laser_cloud_matrix[scan_id][wid]= point; 
+            }
             point.intensity = scan_id + scan_period * rel_time;
-            laser_cloud_scans[scan_id].push_back(point); 
+            laser_cloud_scans[scan_id].push_back(point);
+            
         }
         cloud_size = count;
-
-        PointCloud::Ptr laser_cloud(new PointCloud());
+        PointCloudPtr laser_cloud = PointCloudPtr(new PointCloud());
         // start and end index, and there is a margin between each scans. Later we will compute curvatures for these points.
         for (int i = 0; i < lidar_ring_n; i++)
         { 
+            if(ground_extraction)
+            for(size_t j = 0; j != pixel_width; ++j)
+            {
+                if(laser_cloud_matrix[i][j].intensity >= 0)
+                laser_cloud_matrix[i][j].intensity += laser_cloud->size();
+            }
             scan_start_id[i] = laser_cloud->size() + 5;
             *laser_cloud += laser_cloud_scans[i];
             scan_end_id[i] = laser_cloud->size() - 6;
         }
+        // add extraction of ground points
+        if(ground_extraction)
+        {
+            for (int i = 0; i != pixel_width; ++i)
+            {
+                for(int j = 1; j < lidar_ring_n / 2 - 1; ++j)
+                {
+                    if(laser_cloud_matrix[j][i].intensity < 0 || laser_cloud_matrix[j-1][i].intensity < 0) continue;
+                    float diffX = laser_cloud_matrix[j][i].x - laser_cloud_matrix[j-1][i].x;
+                    float diffY = laser_cloud_matrix[j][i].y - laser_cloud_matrix[j-1][i].y;
+                    float diffZ = laser_cloud_matrix[j][i].z - laser_cloud_matrix[j-1][i].z;
+                    float angle = atan2(diffZ, sqrt(diffX*diffX + diffY*diffY) ) * 180 / M_PI;
+                    if(std::fabs(angle) < 10)
+                    {
+                        int curr_id = (int)(laser_cloud_matrix[j][i].intensity);
+                        int last_id = (int)(laser_cloud_matrix[j - 1][i].intensity);
+                        cloud_neighbor_picked[curr_id] = 1;
+                        cloud_neighbor_picked[last_id] = 1;
+
+                        cloud_label[curr_id] = 5;
+                        cloud_label[last_id] = 5;
+                        
+                        ground_point_ids.insert(curr_id);
+                        ground_point_ids.insert(last_id);
+                    }
+
+                }
+            }
+        }
+        
+
         for (int i = 5; i < cloud_size - 5; i++)
         { 
-            // should notices that here some points' curvatures are invalid.
+            // estimate the curvature of current point
             float diffX = laser_cloud->points[i - 5].x + laser_cloud->points[i - 4].x + laser_cloud->points[i - 3].x + laser_cloud->points[i - 2].x + laser_cloud->points[i - 1].x - 10 * laser_cloud->points[i].x + laser_cloud->points[i + 1].x + laser_cloud->points[i + 2].x + laser_cloud->points[i + 3].x + laser_cloud->points[i + 4].x + laser_cloud->points[i + 5].x;
             float diffY = laser_cloud->points[i - 5].y + laser_cloud->points[i - 4].y + laser_cloud->points[i - 3].y + laser_cloud->points[i - 2].y + laser_cloud->points[i - 1].y - 10 * laser_cloud->points[i].y + laser_cloud->points[i + 1].y + laser_cloud->points[i + 2].y + laser_cloud->points[i + 3].y + laser_cloud->points[i + 4].y + laser_cloud->points[i + 5].y;
             float diffZ = laser_cloud->points[i - 5].z + laser_cloud->points[i - 4].z + laser_cloud->points[i - 3].z + laser_cloud->points[i - 2].z + laser_cloud->points[i - 1].z - 10 * laser_cloud->points[i].z + laser_cloud->points[i + 1].z + laser_cloud->points[i + 2].z + laser_cloud->points[i + 3].z + laser_cloud->points[i + 4].z + laser_cloud->points[i + 5].z;
@@ -206,12 +267,26 @@ namespace rabbit
             cloud_label[i] = 0;
         }
 
-
-
+        ground_points = PointCloudPtr(new PointCloud());
+        less_ground_points = PointCloudPtr(new PointCloud());
         sharp_points = PointCloudPtr(new PointCloud());
         less_sharp_points = PointCloudPtr(new PointCloud());
         flat_points = PointCloudPtr(new PointCloud());
         less_flat_points = PointCloudPtr(new PointCloud());
+
+        std::vector<int> ground_point_ids_vec(ground_point_ids.begin(), ground_point_ids.end());
+
+        std::sort (ground_point_ids_vec.begin(), ground_point_ids_vec.end(),  
+            [&](int _i, int _j){return (cloud_curvature[_i]<cloud_curvature[_j]);});
+
+        
+        for(int i = 0; i != ground_point_ids_vec.size(); ++i)
+        {
+            int tmp_id = ground_point_ids_vec[i];
+            if(ground_points->size() < ground_points_n && cloud_curvature[tmp_id] < 0.1)
+            ground_points->push_back(laser_cloud->points[tmp_id]);
+            less_ground_points->push_back(laser_cloud->points[tmp_id]);
+        }
         for (int i = 0; i < lidar_ring_n; i++)
         {
             if( scan_end_id[i] - scan_start_id[i] < parts_n)
@@ -353,8 +428,45 @@ namespace rabbit
         //     <<"\nLess sharp points: "<<less_sharp_points->points.size()
         //     <<"\nFlat points: "<<flat_points->points.size()
         //     <<"\nLess flat points: "<<less_flat_points->points.size()<<RESET<<std::endl;
+        // estimate the normal
+        if(ground_extraction)
+        {
+            less_ground_kdtree = 
+                pcl::KdTreeFLANN<PointType>::Ptr (new pcl::KdTreeFLANN<PointType>());
+            less_ground_kdtree->setInputCloud(ground_points);
+            Vec3List ground_points_eigen(less_ground_points->size());
+            for(size_t i = 0; i != less_ground_points->size(); ++i)
+            {
+                ground_points_eigen[i] = Vec3(less_ground_points->points[i].x,
+                    less_ground_points->points[i].y, less_ground_points->points[i].z);
+            }
+            double indicator;
+            std::tie(ground_plane_normal, ground_plane_dist, indicator) 
+                = FitPlane(ground_points_eigen); 
+            if(ground_plane_normal.dot(ground_normal) < 0)
+            {
+                ground_plane_normal = - ground_plane_normal;
+                ground_plane_dist = - ground_plane_dist;
+            }
+            // std::cout<<"ground plane normal: "<<ground_plane_normal.transpose()<<std::endl;
+        }
+        if(!ground_removal)
+        {
+            *pcd = *laser_cloud;
+        }
+        else
+        {
+            // std::cout<<pcd->size()<<" ";
+            pcd->points.clear();
+            pcd->points.reserve(laser_cloud->size());
+            for(size_t i = 0; i != laser_cloud->size(); ++i)
+            {
+                if(ground_point_ids.find(i) == ground_point_ids.end())
+                pcd->push_back(laser_cloud->points[i]);
+            }
+            // std::cout<<pcd->size()<<std::endl;
+        }
     }
-
     void Frame::CreateRangeImage()
     {
         range_image = RangeImSphPtr(new RangeImSph ());

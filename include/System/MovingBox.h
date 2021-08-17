@@ -25,6 +25,7 @@ namespace system
         int GetCubeID(const util::Vec3 &pos);
         int GetCubeID(int x_id, int y_id, int z_id);
         void CenterCubesAt(const util::Vec3 &pos);
+        void GetCloseCubeIDs(const util::Vec3 &pos, std::vector<int> &close_cube_ids);
         int cube_size_x = 21;
         int cube_size_y = 21;
         int cube_size_z = 11;

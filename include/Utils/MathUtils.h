@@ -5,6 +5,7 @@
 #include <Eigen/StdVector>
 #include <Eigen/Eigenvalues> 
 #include <Eigen/Eigen>
+#include <tuple>
 #include "sophus/se3.hpp"
 #include "sophus_utils.hpp"
 /*
@@ -138,7 +139,39 @@ namespace util
         Sophus::rightJacobianInvSO3(phi, result);
         return result;
     }
+    inline std::tuple<Vec3, double , double> FitPlane(const Vec3List & _points)
+    {
+        if(_points.size() < 3)
+        {
+            return std::make_tuple(Vec3(0,0,0),0,0);
+        }
+        Vec3 mean_point;
+        Vec3 sum_point;
+        sum_point.setZero();
+        for(size_t i = 0;i < _points.size(); ++i)
+        {
+            sum_point+=_points[i];
+        }
+        mean_point = sum_point / _points.size();
+        Mat3 W, W_tmp;
+        W.setZero();
+        for(size_t i = 0; i!= _points.size(); ++i)
+        {
+            W += (_points[i] - mean_point)* (_points[i] - mean_point).transpose();
+        }
+        W = W / _points.size();
+        Eigen::JacobiSVD<MatX> svd(W, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        auto U = svd.matrixU();
+        auto singular_values = svd.singularValues();
+        Vec3 normal = U.block<3,1>(0,2); 
+        //std::cout<<U<<std::endl;   
+        normal.normalize();    
 
+        double d = - mean_point.transpose() * normal;
+
+        double indicator = singular_values(2) / singular_values(1);
+        return std::make_tuple(normal,d, indicator);
+    }
 }
 }
 #endif

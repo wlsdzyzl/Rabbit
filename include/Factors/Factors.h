@@ -188,6 +188,37 @@ namespace factor
         double weight;
     };
 
+    struct Plane2PlaneEquationFactor
+    {
+
+        Plane2PlaneEquationFactor(Vec3 curr_plane_n_, Vec3 last_plane_n_,
+                            double w_) : curr_plane_n(curr_plane_n_), last_plane_n(last_plane_n_),
+                                                            weight(w_){}
+
+        template <typename T>
+        bool operator()(const T *c2l, T *residual) const
+        {
+            Eigen::Map<Sophus::SE3<T> const> const curr2last(c2l);
+            // Sophus::SE3<T> proj2last= Sophus::interpolate(Sophus::SE3<T>(), Sophus::SE3<T>(curr2last), T(s));
+            Eigen::Matrix<T, 3, 1> cpn{T(curr_plane_n.x()), T(curr_plane_n.y()), T(curr_plane_n.z())};
+            Eigen::Matrix<T, 3, 1> lpn{T(last_plane_n.x()), T(last_plane_n.y()), T(last_plane_n.z())};
+            Eigen::Matrix<T, 3, 1> trans_cp = curr2last.so3() * cpn;
+            residual[0] = weight * (trans_cp.normalized().dot(lpn.normalized()) - T(1));
+            return true;
+        }
+
+        static ceres::CostFunction *Create(const Vec3 curr_plane_n_, const Vec3 last_plane_n_,
+                                            const double w_ = 1)
+        {
+            return (new ceres::AutoDiffCostFunction<
+                    Plane2PlaneEquationFactor, 1, SE3::num_parameters>(
+                new Plane2PlaneEquationFactor(curr_plane_n_, last_plane_n_, w_)));
+        }
+
+        Vec3 curr_plane_n;
+        Vec3 last_plane_n;
+        double weight;
+    };
 
     struct Point2PointFactor
     {

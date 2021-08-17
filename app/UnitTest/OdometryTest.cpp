@@ -21,11 +21,12 @@ int main(int argc, char **argv)
         std::string method = argv[2];
         for(size_t i = 0; i != seq.size(); ++i)
         {
-            LoadPCD(seq[i], pcd);
+            LoadFile(seq[i], pcd);
             Frame current_frame;
             current_frame.SetPCD(pcd);
             // std::cout<<Frame::lidar_ring_n<<std::endl;
-            if(method == "loam") current_frame.ComputeLOAMFeature();
+            if(method == "loam" || method == "loammapping") current_frame.ComputeLOAMFeature();
+            if(method == "icpn") current_frame.ComputeNormal();
             if(i > 0)
             {
                 if( method == "icp")
@@ -34,11 +35,18 @@ int main(int argc, char **argv)
                 lo.GICP(last_frame, current_frame, T);
                 else if(method == "ndt")
                 lo.NDT(last_frame, current_frame, T);
+                else if(method == "gicpomp")
+                lo.GICPOMP(last_frame, current_frame, T);
+                else if(method == "ndtomp")
+                lo.NDTOMP(last_frame, current_frame, T);
                 else if(method == "loam")
                 lo.Loam(last_frame, current_frame, T);
                 else if(method == "loammapping")
                 lo.LoamMapping(last_frame, current_frame, T);
+                else if(method == "icpn")
+                lo.ICPN(last_frame, current_frame, T);
                 global_T = T * global_T;
+                current_frame.pose = global_T;
             }
             pcl::transformPointCloud (pcd, pcd, global_T.inverse().matrix());
             if(i % 5 == 0)
@@ -59,11 +67,13 @@ int main(int argc, char **argv)
     else if(argc == 4)
     {
         PointCloud source, target;
+        Frame::ground_extraction = true;
         Frame sf, tf;
-        LoadPCD(argv[1], source);
-        LoadPCD(argv[2], target);
+        LoadFile(argv[1], source);
+        LoadFile(argv[2], target);
         sf.SetPCD(source);
         tf.SetPCD(target);   
+        double inlier_ratio = 0.1;
         LidarOdometry lo;
         //         Mat4 mat_T;
         //         mat_T <<     0.954353,  -0.298511, -0.0100912,    1.07876,
@@ -75,22 +85,32 @@ int main(int argc, char **argv)
         SE3 T;
         std::string method = argv[3];
         if( method == "icp")
-        lo.ICP(sf, tf, T);
+        lo.ICP(sf, tf, T, inlier_ratio);
         else if(method == "gicp")
-        lo.GICP(sf, tf, T);
+        lo.GICP(sf, tf, T, inlier_ratio);
         else if(method == "ndt")
-        lo.NDT(sf, tf, T);
-        else if(method == "loam")
+        lo.NDT(sf, tf, T, inlier_ratio);
+        else if(method == "gicpomp")
+        lo.GICPOMP(sf, tf, T, inlier_ratio);
+        else if(method == "ndtomp")
+        lo.NDTOMP(sf, tf, T, inlier_ratio);
+        else if(method == "icpn")
         {
+            sf.ComputeNormal();
+            tf.ComputeNormal();
+            lo.ICPN(sf, tf, T, inlier_ratio);
+        }
+        else if(method == "loam")
+        {   
             sf.ComputeLOAMFeature();
-            tf.ComputeLOAMFeature();
-            lo.Loam(sf, tf, T);
+            tf.ComputeLOAMFeature();         
+            lo.Loam(sf, tf, T, inlier_ratio);
         }
         else if(method == "loammapping")
         {
             sf.ComputeLOAMFeature();
             tf.ComputeLOAMFeature();
-            lo.LoamMapping(sf, tf, T);
+            lo.LoamMapping(sf, tf, T, inlier_ratio);
         }
         else
         {

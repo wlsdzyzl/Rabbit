@@ -142,6 +142,13 @@ namespace util
             }
         }     
     }
+    void ToEigenPoints(const PointCloud &pcl_pcd, Vec3List &eigen_points)
+    {
+        eigen_points.resize(pcl_pcd.size());
+        for(size_t i = 0; i != eigen_points.size(); ++i)
+        eigen_points[i] = Vec3(pcl_pcd.points[i].x, 
+            pcl_pcd.points[i].y, pcl_pcd.points[i].z);
+    }
     std::string AbsolutePath(const std::string &f)
     {
         if(Exists(f))

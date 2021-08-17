@@ -22,6 +22,30 @@ namespace system
 
         return GetCubeID(x_id, y_id, z_id);
     }
+    void MovingBox::GetCloseCubeIDs(const util::Vec3 &pos,
+        std::vector<int> &close_cube_ids)
+    {
+        int x_id = std::round(pos(0) / cube_len)
+            - cube_origin_x;
+        int y_id = std::round(pos(1) / cube_len)
+            - cube_origin_y;
+        int z_id = std::round(pos(2) / cube_len)
+            - cube_origin_z;
+        int center_id = GetCubeID(x_id, y_id, z_id);
+        // if(center_id != -1)
+        // close_cube_ids.push_back(center_id);
+        int half_cube_size_x = cube_size_x / 2;
+        int half_cube_size_y = cube_size_y / 2;
+        int half_cube_size_z = cube_size_z / 2;
+        for(int i = -half_cube_size_x; i <= half_cube_size_x; ++i)      
+        for(int j = -half_cube_size_y; j <= half_cube_size_y; ++j) 
+        for(int k = -half_cube_size_z; k <= half_cube_size_z; ++k)
+        {
+            int tmp_id = GetCubeID(x_id + i, y_id + j, z_id + k);
+            if(tmp_id != -1)
+            close_cube_ids.push_back(tmp_id);
+        } 
+    }
     void MovingBox::CenterCubesAt(const util::Vec3 &pos)
     {
         int tmp_origin_x = std::round(pos(0) / cube_len)

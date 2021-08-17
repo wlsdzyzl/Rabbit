@@ -9,18 +9,11 @@ namespace rabbit
 {
 namespace system
 {
-    enum OdometryMethod
-    {
-        NDT,
-        ICP,
-        GICP,
-        LOAM
-    };
     using namespace util;
     class GraphBase
     {
         public:
-        GraphBase():lcdetector(keyframe_list){};
+        GraphBase():lcdetector(*this){};
 
         void SetSlidingWindow(int type)
         {
@@ -36,13 +29,18 @@ namespace system
         std::vector<int> GetFrameIDInSlidingWindow();
         //check the pose difference to decide if we should add a new keyframe
         bool NewKeyframe(const SE3 &delta_pose);
-        void AddNewFrameSubmap(const Frame &f);
-        void AddNewFrameSlidingWindow(const Frame &f);
+        SE3 AddNewFrame(const Frame &new_frame);
+        SE3 AddNewFrameSubmap(const Frame &f);
+        SE3 AddNewFrameSlidingWindow(const Frame &f);
+        void ConstructSWVolume(const std::vector<int> &ids_in_sw, Frame &volume);
+        void ConstructSubmapVolume(int submap_id, Frame &volume);
         void Optimize();
+        void OptimizeSubmap();
         void OptimizeLocal();
         bool IsKeyframeInserted(){return keyframe_list.back().frame_id == (relative_pose_list.size() - 1);}
         bool Matching(const Frame &s, const Frame &t, SE3 &T);
         bool Mapping(const Frame &s, const Frame &t, SE3 &T);
+        // bool GroundMapping(const Frame &s, const Frame &t, SE3 &T);
         void SetMatchingMethod(const std::string &m)
         {
             if(m == "loam")
@@ -53,6 +51,10 @@ namespace system
             matching_method = OdometryMethod::ICP;
             else if(m == "gicp")
             matching_method = OdometryMethod::GICP;
+            else if(m == "ndt_omp"||m == "ndtomp")
+            matching_method = OdometryMethod::NDTOMP;
+            else if(m == "gicp_omp" || m == "gicpomp")
+            matching_method = OdometryMethod::GICPOMP;
             else
             {
                 std::cout<<YELLOW<<"[WARNING]::[SetOdometry]::unsupported method. Use default: loam odometry."<<RESET<<std::endl;
@@ -69,10 +71,19 @@ namespace system
             mapping_method = OdometryMethod::ICP;
             else if(m == "gicp")
             mapping_method = OdometryMethod::GICP;
+            else if(m == "ndt_omp"||m == "ndtomp")
+            mapping_method = OdometryMethod::NDTOMP;
+            else if(m == "gicp_omp" || m == "gicpomp")
+            mapping_method = OdometryMethod::GICPOMP;
             else
             {
                 std::cout<<YELLOW<<"[WARNING]::[SetOdometry]::unsupported method. Use default: loam odometry."<<RESET<<std::endl;
             }
+        }
+        void SetGroundPriority(bool gp)
+        {
+            use_ground_priority = gp;
+            Frame::ground_extraction = gp;
         }
         SE3List relative_pose_list;
         std::vector<Frame> keyframe_list;
@@ -80,6 +91,8 @@ namespace system
         std::vector<optimization::FrameCorrespondence> keyframe_corrs;
         // local frame corrs, used to optimize local frames between two keyframe.
         std::vector<optimization::FrameCorrespondence> frame_corrs;
+        std::vector<optimization::FrameCorrespondence> submap_corrs;
+        std::vector<int> submap_id_for_keyframes;
         LidarOdometry odometry;
         double angle_threshold = 10;
         double distance_threshold =1.0; 
@@ -105,7 +118,7 @@ namespace system
         bool with_imu = false;
         SE3 relative_T_to_last_frame;
         SE3 relative_T_to_last_keyframe;
-        bool lcd_detection = false;
+        int lcd_detection = 0;
         int min_mapping_n = 5;
         // n keyframe will form a submap
         int submap_len = 20;
@@ -113,6 +126,20 @@ namespace system
         std::vector<Frame> submap_list;
         OdometryMethod matching_method = OdometryMethod::LOAM;
         OdometryMethod mapping_method = OdometryMethod::LOAM;
+        OdometryMethod ground_mapping_method = OdometryMethod::LOAM;
+        bool use_ground_priority = false;
+
+        double matching_score_threshold = 0.5;
+        double mapping_score_threshold = 0.1;
+
+        double matching_inlier_ratio = 0.1;
+        double mapping_inlier_ratio = 0.4;
+        
+        int lcd_detection_interval = 10;
+        int last_lcd_id = 0;
+
+        bool exaustive_mapping = false;
+        double ground_weight = 1.5;
     };
 }
 }

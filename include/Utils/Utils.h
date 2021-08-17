@@ -66,7 +66,7 @@ namespace util
     void ListFileNames(const std::string &folder_name, std::vector<std::string> &files);
     void ListFilePaths(const std::string &folder_name, std::vector<std::string> &filepaths);
     int ExtractIDFromPath(const std::string &path);
-
+    void ToEigenPoints(const PointCloud &pcl_pcd, Vec3List &eigen_points);
     void ColorRemapping(const std::vector<float> &values, Vec3fList &mapped_color);
     void ColorizePointCloud(const PointCloud &pcd, PointCloudRGB &mapped_pcd);
     void ColorizePointCloud(const PointCloud &pcd, const Vec3f &c, PointCloudRGB &mapped_pcd);
