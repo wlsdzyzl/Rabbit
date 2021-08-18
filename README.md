@@ -5,7 +5,7 @@
 
 Rabbit is used to compare several odometry and registration algorithms. It also contains a complete lidar slam system, including lidar odometry, lidar mapping, graph optimization and visualization.
 
-Download lego-loam datasets from https://drive.google.com/drive/folders/16p5UPUCZ1uK0U4XE-hJKjazTsRghEMJa. I transfer the `.bag` data into `.pcd` files. You can also download the pcd dataset from https://drive.google.com/file/d/1aBrVegh6dhOD9TdONvlA4tEoFoUxIikd/view?usp=sharing, which is used for the demo(`RunPCD.cpp`).
+Download lego-loam datasets from https://drive.google.com/drive/folders/16p5UPUCZ1uK0U4XE-hJKjazTsRghEMJa. For simplicity I transfered the `.bag` data into `.pcd` files. You can also download the pcd dataset from https://drive.google.com/file/d/1aBrVegh6dhOD9TdONvlA4tEoFoUxIikd/view?usp=sharing, which is used for the demo(`RunPCD.cpp`).
 
 ### Dependency
 ROS, PCL 1.8.0
