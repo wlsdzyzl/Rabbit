@@ -28,7 +28,9 @@ For mapping strategy, we construct a large and dense volume using three ways: su
 ![](./img/result.png)
 
 **Suitable algorithms for odometry:** Loam (feature-based, faster), GICP, ICP
+
 **Suitable algorithms for mapping:** NDT, ICP, Loam mapping 
+
 **Recommended combination:** Loam odometry + ndtomp mapping + naive loop closure detection + ground normal optimization,
 ```
 rosrun rabbit RabbitRunPCD /media/wlsdzyzl/4986a128-c51f-4384-87a6-abf677343495/lidar-dataset/lego-loam/pcds loam ndtomp 2 1 1 1
