@@ -51,3 +51,6 @@ rosrun rabbit RabbitRunPCD /media/wlsdzyzl/4986a128-c51f-4384-87a6-abf677343495/
 ### Next ...
 - IMU factor
 - Teaser++ and Ransac for global registration
+
+### Acknowledgement
+[A-LOAM](https://github.com/HKUST-Aerial-Robotics/A-LOAM), [Lego-LOAM](https://github.com/RobustFieldAutonomyLab/LeGO-LOAM)
