@@ -80,9 +80,9 @@ namespace system
                 std::cout<<YELLOW<<"[WARNING]::[SetOdometry]::unsupported method. Use default: loam odometry."<<RESET<<std::endl;
             }
         }
-        void SetGroundPriority(bool gp)
+        void SetGroundprior(bool gp)
         {
-            use_ground_priority = gp;
+            use_ground_prior = gp;
             Frame::ground_extraction = gp;
         }
         SE3List relative_pose_list;
@@ -127,7 +127,7 @@ namespace system
         OdometryMethod matching_method = OdometryMethod::LOAM;
         OdometryMethod mapping_method = OdometryMethod::LOAM;
         OdometryMethod ground_mapping_method = OdometryMethod::LOAM;
-        bool use_ground_priority = false;
+        bool use_ground_prior = false;
 
         double matching_score_threshold = 0.5;
         double mapping_score_threshold = 0.1;

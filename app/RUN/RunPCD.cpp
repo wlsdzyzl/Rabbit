@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     if(argc < 2)
     {
-        std::cout<<"usage: RunPCD [pcd_folder] [matching_method = loam] [mapping_method = icp] [sliding_window = 1] [lcd_detection = 0] [ground_normal_opt = 0] [exaustive_mapping = 0] [visualization = 0]"<<std::endl;
+        std::cout<<"usage: RunPCD [pcd_folder] [matching_method = loam] [mapping_method = icp] [sliding_window = 1] [lcd_detection = 0] [ground_normal_opt = 0] [visualization = 0]"<<std::endl;
         return 0;
     }
 
@@ -20,19 +20,16 @@ int main(int argc, char **argv)
     std::string mapping_method = "loam";
     int sliding_window_type = 1;
     int lcd_detection = 0;
-    bool use_ground_priority = false;
-    bool exaustive_mapping = false;
+    bool use_ground_prior = false;
     bool visualization = false;
 
     if(argc > 2) matching_method = argv[2];
     if(argc > 3) mapping_method = argv[3];
     if(argc > 4) sliding_window_type = atoi(argv[4]);
     if(argc > 5) lcd_detection = atoi(argv[5]);
-    if(argc > 6) use_ground_priority = atoi(argv[6]);
-    if(argc > 7) exaustive_mapping = atoi(argv[7]);
-    if(argc > 8) visualization = atoi(argv[8]);
-    sys.exaustive_mapping = exaustive_mapping;
-    sys.SetGroundPriority(use_ground_priority);
+    if(argc > 6) use_ground_prior = atoi(argv[6]);
+    if(argc > 7) visualization = atoi(argv[7]);
+    sys.SetGroundprior(use_ground_prior);
     sys.SetMatchingMethod(matching_method);
     sys.SetMappingMethod(mapping_method);
     sys.SetSlidingWindow(sliding_window_type);
@@ -139,8 +136,7 @@ int main(int argc, char **argv)
                 // if(sys.keyframe_list.size() % 20 == 0)            
                 // WritePLY("global_pcd_rgb_"+matching_method+"_"+mapping_method+
                 //     "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+"_"+
-                //     std::to_string(use_ground_priority)+"_"+
-                //     std::to_string(exaustive_mapping)+".ply", global_pcd_rgb);
+                //     std::to_string(use_ground_prior)+".ply", global_pcd_rgb);
                 // WritePLY("global_pcd_"+matching_method+"_"+mapping_method+
                 //     "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+".ply", global_pcd);
 
@@ -151,8 +147,7 @@ int main(int argc, char **argv)
         }
         WritePLY("global_pcd_rgb_"+matching_method+"_"+mapping_method+
             "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+"_"+
-            std::to_string(use_ground_priority)+"_"+
-            std::to_string(exaustive_mapping)+".ply", global_pcd_rgb);
+            std::to_string(use_ground_prior)+".ply", global_pcd_rgb);
 
         visualizer.Show();
     }
@@ -251,8 +246,7 @@ int main(int argc, char **argv)
                 if(sys.keyframe_list.size() % 20 == 0)            
                 WritePLY("global_pcd_rgb_"+matching_method+"_"+mapping_method+
                     "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+"_"+
-                    std::to_string(use_ground_priority)+"_"+
-                    std::to_string(exaustive_mapping)+".ply", global_pcd_rgb);
+                    std::to_string(use_ground_prior)+".ply", global_pcd_rgb);
                 // WritePLY("global_pcd_"+matching_method+"_"+mapping_method+
                 //     "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+".ply", global_pcd);
 
@@ -260,8 +254,7 @@ int main(int argc, char **argv)
         }
         WritePLY("global_pcd_rgb_"+matching_method+"_"+mapping_method+
             "_"+std::to_string(sliding_window_type)+"_"+std::to_string(lcd_detection)+"_"+
-            std::to_string(use_ground_priority)+"_"+
-            std::to_string(exaustive_mapping)+".ply", global_pcd_rgb);
+            std::to_string(use_ground_prior)+".ply", global_pcd_rgb);
 
     }
     return 0;

@@ -45,7 +45,7 @@ namespace system
     }
     bool GraphBase::Mapping(const Frame &s, const Frame &t, SE3 &T)
     {
-        // if(use_ground_priority) GroundMapping(s, t, T);
+        // if(use_ground_prior) GroundMapping(s, t, T);
         double mean_dist, inlier_ratio;
         if(mapping_method == OdometryMethod::LOAM)
         {
@@ -175,7 +175,7 @@ namespace system
             if(!mapping_success) std::cout<<YELLOW<<"[WARNING]::[GraphBase]::mapping to submap failed."<<RESET<<std::endl;
             if(new_submap_flag)
             {   
-                if(use_ground_priority)
+                if(use_ground_prior)
                 {
                     double tmp_indicator;
                     Vec3List submap_ground_points;
@@ -236,7 +236,7 @@ namespace system
             current_submap.less_sharp_kdtree->setInputCloud(current_submap.less_sharp_points);
             current_submap.less_flat_kdtree->setInputCloud(current_submap.less_flat_points);    
 
-            if(use_ground_priority)
+            if(use_ground_prior)
             {
                 pcl::transformPointCloud (*(f.less_ground_points), tmp_pcd, f.pose.matrix());
                 (*(current_submap.less_ground_points)) += tmp_pcd;  
@@ -338,7 +338,7 @@ namespace system
 
                 pcl::transformPointCloud (*(keyframe_list[tmp_kid].less_flat_points), tmp_pcd, keyframe_list[tmp_kid].pose.matrix());
                 (*(volume.less_flat_points)) += tmp_pcd;
-                if(use_ground_priority)
+                if(use_ground_prior)
                 {
                     pcl::transformPointCloud (*(keyframe_list[tmp_kid].ground_points), tmp_pcd, keyframe_list[tmp_kid].pose.matrix());
                     (*(volume.ground_points)) += tmp_pcd;
@@ -376,7 +376,7 @@ namespace system
                 pcl::transformPointCloud (*(keyframe_list[tmp_kid].less_flat_points), tmp_pcd, (submap_list[submap_id_for_keyframes[tmp_kid]].pose *
                     keyframe_list[tmp_kid].pose).matrix());
                 (*(volume.less_flat_points)) += tmp_pcd;
-                if(use_ground_priority)
+                if(use_ground_prior)
                 {
                     pcl::transformPointCloud (*(keyframe_list[tmp_kid].ground_points), tmp_pcd, (submap_list[submap_id_for_keyframes[tmp_kid]].pose *
                     keyframe_list[tmp_kid].pose).matrix());
@@ -419,7 +419,7 @@ namespace system
         volume.less_flat_kdtree->setInputCloud(volume.less_flat_points);
 
 
-        if(use_ground_priority)
+        if(use_ground_prior)
         {
             FilterPCD(*volume.ground_points,  
                 *volume.ground_points, flat_leaf_size, 
@@ -456,7 +456,7 @@ namespace system
 
             pcl::transformPointCloud (*(submap_list[i].less_flat_points), tmp_pcd, relative_pose_to_current_submap.matrix());
             (*(volume.less_flat_points)) += tmp_pcd;
-            if(use_ground_priority)
+            if(use_ground_prior)
             {
                 pcl::transformPointCloud (*(submap_list[i].ground_points), tmp_pcd, relative_pose_to_current_submap.matrix());
                 (*(volume.ground_points)) += tmp_pcd;
@@ -496,7 +496,7 @@ namespace system
         volume.less_flat_kdtree->setInputCloud(volume.less_flat_points);
 
 
-        if(use_ground_priority)
+        if(use_ground_prior)
         {
             FilterPCD(*volume.ground_points,  
                 *volume.ground_points, flat_leaf_size, 
@@ -639,10 +639,10 @@ namespace system
                         }
                         if(mapping_success_tmp)
                         {
-                            if(use_ground_priority && 
+                            if(use_ground_prior && 
                                 ((candidate_frame.pose * loop_relative_T).so3() * f.ground_plane_normal).normalized().dot(keyframe_list[0].ground_plane_normal) < 0.5)
                             {
-                                std::cout<<"use ground priority to filter out false loop closure detection! "<<std::endl;
+                                std::cout<<"use ground prior to filter out false loop closure detection! "<<std::endl;
                                 continue;
                             }
                             std::cout<<"Detect Loop closure, candidate id: "<<keyframe_list[candidate_ids[id]].frame_id<<" "<<candidate_ids[id]<<std::endl;
@@ -670,7 +670,7 @@ namespace system
     {
         if(!with_imu)
         {
-            if(use_ground_priority)
+            if(use_ground_prior)
             optimizer.OptimizeWithGroundNormal(keyframe_list, keyframe_corrs, ground_weight);
             else 
             optimizer.Optimize(keyframe_list, keyframe_corrs);
@@ -678,7 +678,7 @@ namespace system
     }
     void GraphBase::OptimizeSubmap()
     {
-        if(use_ground_priority) 
+        if(use_ground_prior) 
             optimizer.OptimizeWithGroundNormal(submap_list, submap_corrs);
         else
             optimizer.Optimize(submap_list, submap_corrs);

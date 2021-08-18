@@ -83,6 +83,8 @@ int main(int argc, char **argv)
 
         // std::cout<<mat_T<<std::endl;
         SE3 T;
+        sf.ComputeLOAMFeature();
+        tf.ComputeLOAMFeature();
         std::string method = argv[3];
         if( method == "icp")
         lo.ICP(sf, tf, T, inlier_ratio);
@@ -102,8 +104,7 @@ int main(int argc, char **argv)
         }
         else if(method == "loam")
         {   
-            sf.ComputeLOAMFeature();
-            tf.ComputeLOAMFeature();         
+        
             lo.Loam(sf, tf, T, inlier_ratio);
         }
         else if(method == "loammapping")
@@ -126,7 +127,7 @@ int main(int argc, char **argv)
         pcl::transformPointCloud (s_rgb, s_rgb, T.matrix());
         final_rgb += s_rgb;
         final_rgb += t_rgb;
-        final_rgb += origin_s_rgb;
+        // final_rgb += origin_s_rgb;
         visualizer.SetPCD(final_rgb);
         visualizer.Show();
         return 0;
