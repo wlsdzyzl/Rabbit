@@ -15,7 +15,7 @@ ROS, PCL 1.8.0, Ceres, OpenCV
 Rabbit supports LOAM, ICP, GICP(omp), NDT(omp) for lidar point cloud odometry and mapping. In LOAM method of rabbit, we have edge features, planar features and ground features. And the idea of ground feature is adopted from Lego-loam. Using ground prior has several advantages:
 - Loam odometry can treat ground points as a unique feature to improve the accuracy and reduce mis-matching.
 - We could compute a ground normal through ground points for each frame, and ground normal constraints could be introduced as a new factor in final graph optimization.
-- Ground point removal is also helpful for general point cloud registration, because ground points is usually not distinguishable. Here is an example (icp registration with / without ground point removal): 
+- Ground point removal is also helpful for general point cloud registration, because ground point is usually not distinguishable. Here is an example (icp registration with / without ground point removal): 
 
 ![](./img/with_ground_removal.png)
 
